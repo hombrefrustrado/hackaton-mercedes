@@ -87,5 +87,81 @@
     {
         "departamento":"RRHH",
         "query":"Cuales deberían ser los criterios de contratación de un empleado"
+    },
+    {
+        "departamento":"RRHH",
+        "query":"¿Cómo hago amigos?"
+    },
+    {
+        "departamento":"RRHH",
+        "query":"¿Qué criterios clave priorizarías al filtrar CVs para un puesto de operario de línea de montaje final frente a uno para la sección de pintura robotizada?"
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Estamos buscando Ingenieros de Software especializados en sistemas de infoentretenimiento y conducción autónoma. Redacta un mensaje de contacto directo por LinkedIn que resulte atractivo para un perfil senior que actualmente trabaja en el sector tecnológico puro, no automotriz."
+    },
+    {
+        "departamento":"RRHH",
+        "query":"¿Qué tono argumental debes usar al responder de manera oficial a una queja formal del Comité de Empresa sobre la temperatura en la planta de estampación?"
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Un grupo de trabajadores de la planta de motores se niega a realizar horas extraordinarias obligatorias, las cuales están respaldadas por el convenio colectivo debido a un cuello de botella en los suministros. Redacta un comunicado interno conciliador pero firme, recordando las obligaciones legales y el impacto en la cadena."
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Resume de forma directa y visual el protocolo de seguridad que debe seguir un empleado de mantenimiento antes de intervenir un brazo robótico bloqueado."
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Tras la introducción de la nueva línea de montaje de vehículos híbridos, se ha detectado un aumento del 15% en bajas médicas por fatiga muscular y ergonomía. Diseña una campaña interna rápida de concienciación y pausas activas específica para estos operarios."
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Ha ocurrido un incidente leve en la sección de fundición: un operario sufrió una quemadura superficial por no llevar los guantes reglamentarios de protección térmica. El supervisor quiere sancionarlo de inmediato, pero el trabajador alega que el almacén de EPIs no tenía su talla esa mañana. ¿Cómo debes gestionar esta situación desde el punto de vista de RRHH para equilibrar la disciplina, la seguridad y la responsabilidad legal de la empresa?"
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Redacta un anuncio breve para los tablones de la fábrica comunicando una parada técnica obligatoria de 3 días por mantenimiento de la línea de producción."
+    },
+    {
+        "departamento":"RRHH",
+        "query":"La encuesta de clima laboral revela una fuerte resistencia al cambio y desmotivación en el equipo tradicional de mecánicos de motores de combustión, debido a la progresiva transición de la fábrica hacia la producción exclusiva de vehículos eléctricos. ¿Qué acciones formativas o de comunicación interna propones para mitigar este miedo?"
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Transforma una evaluación de desempeño muy técnica e individual de un supervisor de planta en un resumen ejecutivo de tres puntos clave para la dirección de RRHH."
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Analiza el siguiente caso de un Team Leader de control de calidad: cumple con todos los objetivos de la auditoría de producto (cero fallos), pero su equipo tiene la tasa de rotación voluntaria más alta de la fábrica. ¿Cuál es tu diagnóstico y qué plan de acción sugieres?"
+    },
+    {
+        "departamento":"RRHH",
+        "query":"¿Cuántos días de vacaciones le corresponden por convenio a un ingeniero informático en España?"
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Redacta un aviso SMS de cambio de turno de mañana a noche para la Línea 2. Se diplomático, amable y people person."
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Escribe una felicitación breve a la Línea 1 por batir el récord diario de producción. No muy cordial."
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Redacta la respuesta automática de RRHH para dudas comunes sobre el ingreso de la paga extra."
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Un Jefe de Turno clave, con 15 años de experiencia y un conocimiento profundo de la maquinaria pesada, está mostrando un rendimiento bajo y actitudes apáticas desde que se digitalizó el sistema de reporte de incidencias (MES/SAP). Los objetivos de su turno están cayendo. ¿Cómo enfocarías una entrevista de desarrollo con él para recuperar su motivación sin que sienta que sus años de experiencia ya no valen nada?"
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Un operario del taller de pintura solicita cambiar su turno de noche del viernes por el de mañana del sábado. Redacta la respuesta oficial denegando la solicitud basándote en los tiempos mínimos de descanso que exige el convenio, que ya ha sobrepasado."
+    },
+    {
+        "departamento":"RRHH",
+        "query":"Cual es la mejor forma de bajar el sueldo a cuatro trabajadores de control de calidad en una planta automotriz (tienen mucha compenetración y camaradería) minimizando las posibles repercusiones negativas."
     }
 ]
