@@ -46,7 +46,7 @@ def init_knn():
     except Exception as e:
         logger.error(f"Failed to initialize KNN routing: {e}")
 
-def predict_knn_model(role_name: str, prompt_tokens: int) -> str:
+def predict_knn_model(role_name: str, prompt_tokens: int, concretitud, especificacion, criticidad) -> str:
     """Predicts the best model using the loaded KNN classifier and Gower distance."""
     init_knn()
     
@@ -68,7 +68,10 @@ def predict_knn_model(role_name: str, prompt_tokens: int) -> str:
             "prompt_tokens": int(prompt_tokens),
             "completion_tokens": median_completion,
             "total_tokens": int(prompt_tokens) + median_completion,
-            "cost": median_cost
+            "cost": median_cost,
+            "concretitud": concretitud,
+            "especificacion": especificacion,
+            "criticidad": criticidad
         }])
         
         # Convert departamento to object type

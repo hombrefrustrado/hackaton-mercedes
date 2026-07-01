@@ -2,7 +2,6 @@ import time
 import logging
 import httpx
 from flask import Blueprint, request, jsonify, Response
-
 from ..config import PROVIDER_A_URL, PROVIDER_B_URL, PROVIDER_C_URL, GROQ_API_KEY
 from ..database import (
     get_db_connection,
@@ -106,14 +105,18 @@ def handle_proxy(model_name):
     # Run KNN classifier if auto-routing is requested
     if resolved == "auto":
         from ..utils.knn_routing import predict_knn_model
+        from ....testing.analyzer_simple import analyze_query
+
         prompt = ""
         for msg in body.get("messages", []):
             prompt += msg.get("content", "")
         prompt_tokens = max(1, round(len(prompt) / 4))
         
+        query_scores = analyze_query(prompt)
+
         # Predict using KNN classifier
-        resolved = predict_knn_model(role_name.lower(), prompt_tokens)
-        logger.info(f"KNN Classifier selected model '{resolved}' for role '{role_name}' and {prompt_tokens} prompt tokens.")
+        resolved = predict_knn_model(role_name.lower(), prompt_tokens, query_scores['concretitud'], query_scores['especificacion'], query_scores['criticidad'])
+        logger.info(f"KNN Classifier selected model '{resolved}' for role '{role_name}', {prompt_tokens} prompt tokens and {query_scores} query scores.")
 
     body["model"] = resolved
     
