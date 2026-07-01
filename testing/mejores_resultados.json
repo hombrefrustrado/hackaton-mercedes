@@ -1,0 +1,707 @@
+[
+  {
+    "departamento": "marketing",
+    "query": "Redacta una secuencia de 5 correos electrónicos automatizados (funnel de ventas) para usuarios que acaban de registrarse en nuestra versión de prueba gratuita pero aún no han comprado el plan premium",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.2158544063568115,
+    "prompt_tokens": 80,
+    "concretitud": 0.0,
+    "especificacion": 4.32,
+    "criticidad": 0.0,
+    "tamano_respuesta": 8.03
+  },
+  {
+    "departamento": "marketing",
+    "query": "Escribe el guion completo para un vídeo de YouTube de 8 minutos estructurado con una introducción que enganche, desarrollo en 4 puntos clave, y cierre invitando a probar nuestra API.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 0.9417352676391602,
+    "prompt_tokens": 79,
+      "concretitud": 0.0,
+      "especificacion": 4.3,
+      "criticidad": 0.0,
+      "tamano_respuesta": 10.0
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Redacta una nota de prensa formal de 500 palabras anunciando que nuestra empresa ha cerrado una ronda de financiación para expandir soluciones de IA en Europa",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.217726469039917,
+    "prompt_tokens": 73,
+      "concretitud": 0.0,
+      "especificacion": 4.06,
+      "criticidad": 0.0,
+      "tamano_respuesta": 10.0
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Genera 10 ideas de ganchos (hooks) visuales y guiones cortos para videos de TikTok e Instagram Reels enfocados en captar la atención de desarrolladores backend",
+    "model": "llama3.2:3b",
+    "latency_s": 3.0833613872528076,
+    "prompt_tokens": 65,
+      "concretitud": 0.0,
+      "especificacion": 1.5,
+      "criticidad": 0.0,
+      "tamano_respuesta": 5.0
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Crea 3 variaciones de copy publicitario para anuncios de Facebook e Instagram Ads utilizando el método AIDA (Atención, Interés, Deseo, Acción) dirigidos a directores de tecnología (CTOs)",
+    "model": "llama3.2:3b",
+    "latency_s": 2.365051031112671,
+    "prompt_tokens": 75,
+      "concretitud": 0.0,
+      "especificacion": 4.12,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.7
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Escribe un post detallado para LinkedIn analizando los resultados del último informe de Gartner sobre FinOps. El tono debe ser profesional, analítico y generar debate en los comentarios.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.0269749164581299,
+    "prompt_tokens": 76,
+      "concretitud": 2.5,
+      "especificacion": 1.68,
+      "criticidad": 0.0,
+      "tamano_respuesta": 10.0
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Crea un calendario editorial para Twitter/X de una semana entera (7 tuits en total, uno por día) combinando consejos de productividad y memes sutiles sobre programación.",
+    "model": "llama3.2:3b",
+    "latency_s": 2.7699971199035645,
+    "prompt_tokens": 65,
+      "concretitud": 0.0,
+      "especificacion": 4.06,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.6
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Escribe el guion técnico y creativo para un anuncio de vídeo de 30 segundos en YouTube para un coche deportivo de gama alta. Divide el guion en dos columnas: una para la 'Descripción Visual de la Escena' (planos, iluminación, movimiento del coche) y otra para el 'Audio / Voz en Off'. El concepto central debe evocar exclusividad, adrenalina y éxito, enfocado en un perfil de comprador de entre 35 y 50 años.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.1195168495178223,
+    "prompt_tokens": 147,
+      "concretitud": 0.0,
+      "especificacion": 2.56,
+      "criticidad": 0.0,
+      "tamano_respuesta": 10.0
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Clasifica la siguiente lista de 30 palabras clave según su intención de búsqueda (Informativa, Transaccional o Comercial) y sugiéreme cuáles deberíamos atacar primero: 'comprar saas barato', 'qué es una base de datos relacional', 'desarrollo web malaga', 'precio de openai vs claude 2026'...",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.0285954475402832,
+    "prompt_tokens": 119,
+      "concretitud": 5.0,
+      "especificacion": 7.02,
+      "criticidad": 0.0,
+      "tamano_respuesta": 3.36
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Escribe las etiquetas Meta Title (máximo 60 caracteres) y Meta Description (máximo 155 caracteres) optimizadas para SEO para las 5 páginas de destino principales de nuestra web.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.1725659370422363,
+    "prompt_tokens": 77,
+      "concretitud": 0.0,
+      "especificacion": 4.12,
+      "criticidad": 0.0,
+      "tamano_respuesta": 7.7
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Propón 15 nombres creativos y eslóganes comerciales impactantes para un nuevo software que controla y audita el gasto que hacen los empleados en APIs de Inteligencia Artificial.",
+    "model": "llama3.2:3b",
+    "latency_s": 2.3903350830078125,
+    "prompt_tokens": 66,
+      "concretitud": 0.0,
+      "especificacion": 6.62,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.7
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Danos 5 ideas disruptivas de campañas de marketing de guerrilla o acciones B2B presenciales para llamar la atención en el próximo evento tecnológico de AWS.",
+    "model": "llama3.2:3b",
+    "latency_s": 2.7364180088043213,
+    "prompt_tokens": 64,
+      "concretitud": 0.0,
+      "especificacion": 4.0,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.5
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Queremos lanzar un nuevo lead magnet (imán de leads). ¿Qué tipo de recurso (Ebook, Plantilla Excel, Checklist, Minicurso por email) resultaría más atractivo para ingenieros de datos sénior?",
+    "model": "llama3.2:3b",
+    "latency_s": 2.494178056716919,
+    "prompt_tokens": 79,
+      "concretitud": 0.0,
+      "especificacion": 1.68,
+      "criticidad": 0.0,
+      "tamano_respuesta": 5.3
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Diseña una estrategia de gamificación para nuestra comunidad de Discord de manera que los usuarios consigan recompensas o merchandising por invitar a otros desarrolladores.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.2401349544525146,
+    "prompt_tokens": 73,
+      "concretitud": 0.0,
+      "especificacion": 3.94,
+      "criticidad": 0.0,
+      "tamano_respuesta": 7.4
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Adapta esta campaña publicitaria pensada originalmente para el mercado de Estados Unidos para que resulte atractiva y culturalmente relevante para el mercado de México.",
+    "model": "llama3.2:3b",
+    "latency_s": 2.4068603515625,
+    "prompt_tokens": 62,
+      "concretitud": 0.0,
+      "especificacion": 3.94,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.4
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Reescribe estos 5 titulares de banners web para que se ajusten estrictamente a las limitaciones de diseño de Google Ads (máximo 30 caracteres por título).",
+    "model": "llama3.2:3b",
+    "latency_s": 2.455118417739868,
+    "prompt_tokens": 62,
+      "concretitud": 0.0,
+      "especificacion": 1.5,
+      "criticidad": 0.0,
+      "tamano_respuesta": 5.0
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Ayúdame a redactar las respuestas para la sección de Preguntas Frecuentes (FAQ) de nuestra nueva web sobre cómo funciona el sistema de créditos y devoluciones si un usuario cancela su suscripción.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.9780457019805908,
+    "prompt_tokens": 86,
+      "concretitud": 2.5,
+      "especificacion": 4.32,
+      "criticidad": 0.0,
+      "tamano_respuesta": 5.53
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Genera un slogan atractivo para nuestro nuevo producto (coche gama media).",
+    "model": "llama3.2:3b",
+    "latency_s": 2.659884452819824,
+    "prompt_tokens": 43,
+      "concretitud": 0.0,
+      "especificacion": 3.16,
+      "criticidad": 0.0,
+      "tamano_respuesta": 1.1
+    
+  },
+  {
+    "departamento": "marketing",
+    "query": "Crea 3 variaciones de textos para anuncios de Instagram y Facebook Ads (incluyendo copia principal, titular y sugerencia de botón de llamada a la acción) promocionando nuestro nuevo SUV 100% eléctrico. El público objetivo son familias jóvenes de clase media-alta preocupadas por el medio ambiente y la tecnología. Utiliza un tono cercano y seguro, destacando la autonomía de la batería y el espacio interior.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 0.9343273639678955,
+    "prompt_tokens": 137,
+      "concretitud": 0.0,
+      "especificacion": 7.41,
+      "criticidad": 0.0,
+      "tamano_respuesta": 4.02
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "¿Por qué me da este error en Docker: com.docker.backend.exe exit code -1 al levantar el contenedor de la base de datos? ¿Cómo lo soluciono?",
+    "model": "mistral:7b",
+    "latency_s": 4.8326945304870605,
+    "prompt_tokens": 54,
+      "concretitud": 2.5,
+      "especificacion": 6.44,
+      "criticidad": 2.5,
+      "tamano_respuesta": 2.4
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "Tengo un NullPointerException en Java al intentar mapear este JSON con Jackson. ¿Qué suele causar esto?",
+    "model": "llama3.2:3b",
+    "latency_s": 3.0555765628814697,
+    "prompt_tokens": 50,
+      "concretitud": 0.0,
+      "especificacion": 3.46,
+      "criticidad": 0.0,
+      "tamano_respuesta": 1.6
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "¿Qué significa el código de estado HTTP 422 Unprocessable Entity y en qué casos debería devolverlo mi API en lugar de un 400?",
+    "model": "llama3.2:3b",
+    "latency_s": 2.8937888145446777,
+    "prompt_tokens": 56,
+      "concretitud": 0.0,
+      "especificacion": 8.88,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.3
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "Tengo fugas de memoria (memory leaks) en una aplicación de Node.js en producción. ¿Qué herramientas me recomiendas para hacer un perfilado (profiling) del heap?",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.0114424228668213,
+    "prompt_tokens": 74,
+      "concretitud": 0.0,
+      "especificacion": 3.94,
+      "criticidad": 2.5,
+      "tamano_respuesta": 4.9
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "Escribe una función en Python usando FastAPI para subir un archivo CSV, validar que tenga las columnas 'email' y 'nombre' usando Pydantic, y guardarlo en un bucket de AWS S3.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.079296350479126,
+    "prompt_tokens": 80,
+      "concretitud": 0.0,
+      "especificacion": 9.3,
+      "criticidad": 0.0,
+      "tamano_respuesta": 5.5
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "Refactoriza este componente de React para cambiarlo de Class Component a Functional Component usando Hooks (useState y useEffect): [Inserta aquí un código de 50 líneas]",
+    "model": "llama3.2:3b",
+    "latency_s": 2.492002487182617,
+    "prompt_tokens": 60,
+      "concretitud": 0.0,
+      "especificacion": 6.5,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.5
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "Genera un script en Bash que busque todos los archivos .log en el directorio /var/log modificados en las últimas 24 horas y los comprima en un archivo .tar.gz enviado por SSH a otro servidor",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.0045342445373535,
+    "prompt_tokens": 81,
+      "concretitud": 0.0,
+      "especificacion": 9.37,
+      "criticidad": 0.0,
+      "tamano_respuesta": 5.62
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "Escribe un archivo docker-compose.yml para un entorno de desarrollo local que incluya un contenedor de PostgreSQL con persistencia de datos, un Redis y una app en Node.js.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.1786766052246094,
+    "prompt_tokens": 72,
+      "concretitud": 0.0,
+      "especificacion": 10.0,
+      "criticidad": 0.0,
+      "tamano_respuesta": 5.2
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "¿Cómo puedo optimizar esta consulta SQL que tarda demasiado haciendo un LEFT JOIN entre dos tablas de millones de registros? SELECT u.email, q.fecha FROM Usuario u LEFT JOIN Query q ON u.email = q.Usuario WHERE q.fecha > '2026-01-01';",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.1455986499786377,
+    "prompt_tokens": 92,
+      "concretitud": 2.5,
+      "especificacion": 10.0,
+      "criticidad": 0.0,
+      "tamano_respuesta": 3.24
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "Explica cómo implementar una estrategia de caché tipo Cache-Aside en Redis para una aplicación de catálogo de productos.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.109407663345337,
+    "prompt_tokens": 63,
+      "concretitud": 5.0,
+      "especificacion": 3.58,
+      "criticidad": 0.0,
+      "tamano_respuesta": 4.3
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "¿Cuáles son las mejores prácticas para reducir el tamaño de una imagen Docker de una aplicación Go para producción utilizando multi-stage builds?",
+    "model": "llama3.2:3b",
+    "latency_s": 2.8367867469787598,
+    "prompt_tokens": 55,
+      "concretitud": 0.0,
+      "especificacion": 3.82,
+      "criticidad": 2.5,
+      "tamano_respuesta": 2.2
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "Diseña una arquitectura orientada a eventos (Event-Driven) para un sistema de notificaciones masivas en tiempo real usando Apache Kafka y WebSockets",
+    "model": "llama3.2:3b",
+    "latency_s": 2.9422390460968018,
+    "prompt_tokens": 60,
+      "concretitud": 0.0,
+      "especificacion": 3.76,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.1
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "¿Cuándo es mejor usar una base de datos NoSQL como MongoDB en lugar de una relacional como PostgreSQL para el backend de un e-commerce?",
+    "model": "llama3.2:3b",
+    "latency_s": 2.80415678024292,
+    "prompt_tokens": 56,
+      "concretitud": 2.5,
+      "especificacion": 6.44,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.4
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "Explica el patrón de diseño Saga y cómo ayuda a manejar transacciones distribuidas en una arquitectura de microservicios sin perder la consistencia",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.2006235122680664,
+    "prompt_tokens": 70,
+      "concretitud": 5.0,
+      "especificacion": 8.82,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.2
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "Escribe los tests unitarios con Jest y React Testing Library para un componente de formulario de login que maneja errores de credenciales",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.083036184310913,
+    "prompt_tokens": 62,
+      "concretitud": 0.0,
+      "especificacion": 3.82,
+      "criticidad": 2.5,
+      "tamano_respuesta": 4.7
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "Genera la documentación técnica en formato Markdown para una API REST con un endpoint POST /api/v1/queries que reciba un JSON con usuario y modelo.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.0467851161956787,
+    "prompt_tokens": 69,
+      "concretitud": 0.0,
+      "especificacion": 10.0,
+      "criticidad": 0.0,
+      "tamano_respuesta": 4.9
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "¿Cómo puedo hacer un mock de una llamada HTTP externa usando la librería unittest.mock en Python para que mis tests no dependan de internet?",
+    "model": "llama3.2:3b",
+    "latency_s": 2.9154646396636963,
+    "prompt_tokens": 57,
+      "concretitud": 2.5,
+      "especificacion": 3.94,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.4
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "¿Cuál es la diferencia exacta entre useEffect y useLayoutEffect en React? Ponme un ejemplo práctico de cuándo el renderizado visual se rompería si uso el incorrecto.",
+    "model": "llama3.2:3b",
+    "latency_s": 2.930920124053955,
+    "prompt_tokens": 67,
+      "concretitud": 0.0,
+      "especificacion": 4.06,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.6
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "Este componente de React se vuelve extremadamente lento y se re-renderiza con cada pulsación de tecla en el buscador. ¿Cómo puedo optimizarlo usando useMemo, useCallback o React.memo? Aquí está el código: [Inserta un componente con una lista grande mapeada y un input de texto]",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.1519041061401367,
+    "prompt_tokens": 101,
+      "concretitud": 5.0,
+      "especificacion": 4.55,
+      "criticidad": 0.0,
+      "tamano_respuesta": 3.42
+    
+  },
+  {
+    "departamento": "desarrollo",
+    "query": "Mi aplicación web tiene un indicador INP (Interaction to Next Paint) pésimo en Google Lighthouse. ¿Qué estrategias en JavaScript puedo usar para romper tareas largas (long tasks) y liberar el hilo principal?",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.1084136962890625,
+    "prompt_tokens": 86,
+      "concretitud": 5.0,
+      "especificacion": 6.84,
+      "criticidad": 0.0,
+      "tamano_respuesta": 8.06
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Cuales deberían ser los criterios de contratación de un empleado",
+    "model": "llama3.2:3b",
+    "latency_s": 2.6849825382232666,
+    "prompt_tokens": 40,
+      "concretitud": 0.0,
+      "especificacion": 0.6,
+      "criticidad": 0.0,
+      "tamano_respuesta": 1.0
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "¿Cómo hago amigos?",
+    "model": "llama3.2:3b",
+    "latency_s": 2.6665523052215576,
+    "prompt_tokens": 31,
+      "concretitud": 2.5,
+      "especificacion": 0.18,
+      "criticidad": 0.0,
+      "tamano_respuesta": 0.3
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "¿Qué criterios clave priorizarías al filtrar CVs para un puesto de operario de línea de montaje final frente a uno para la sección de pintura robotizada?",
+    "model": "llama3.2:3b",
+    "latency_s": 2.9666481018066406,
+    "prompt_tokens": 63,
+      "concretitud": 0.0,
+      "especificacion": 1.56,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.6
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Estamos buscando Ingenieros de Software especializados en sistemas de infoentretenimiento y conducción autónoma. Redacta un mensaje de contacto directo por LinkedIn que resulte atractivo para un perfil senior que actualmente trabaja en el sector tecnológico puro, no automotriz.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.1343903541564941,
+    "prompt_tokens": 100,
+      "concretitud": 0.0,
+      "especificacion": 4.44,
+      "criticidad": 0.0,
+      "tamano_respuesta": 5.74
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "¿Qué tono argumental debes usar al responder de manera oficial a una queja formal del Comité de Empresa sobre la temperatura en la planta de estampación?",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.0826294422149658,
+    "prompt_tokens": 70,
+      "concretitud": 0.0,
+      "especificacion": 4.06,
+      "criticidad": 0.0,
+      "tamano_respuesta": 5.1
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Un grupo de trabajadores de la planta de motores se niega a realizar horas extraordinarias obligatorias, las cuales están respaldadas por el convenio colectivo debido a un cuello de botella en los suministros. Redacta un comunicado interno conciliador pero firme, recordando las obligaciones legales y el impacto en la cadena.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.2278401851654053,
+    "prompt_tokens": 116,
+      "concretitud": 0.0,
+      "especificacion": 4.66,
+      "criticidad": 5.0,
+      "tamano_respuesta": 8.6
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Resume de forma directa y visual el protocolo de seguridad que debe seguir un empleado de mantenimiento antes de intervenir un brazo robótico bloqueado.",
+    "model": "mistral:7b",
+    "latency_s": 4.706854343414307,
+    "prompt_tokens": 46,
+      "concretitud": 0.0,
+      "especificacion": 1.44,
+      "criticidad": 5.0,
+      "tamano_respuesta": 2.4
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Tras la introducción de la nueva línea de montaje de vehículos híbridos, se ha detectado un aumento del 15% en bajas médicas por fatiga muscular y ergonomía. Diseña una campaña interna rápida de concienciación y pausas activas específica para estos operarios.",
+    "model": "llama3.2:3b",
+    "latency_s": 2.5370280742645264,
+    "prompt_tokens": 96,
+      "concretitud": 0.0,
+      "especificacion": 4.5,
+      "criticidad": 0.0,
+      "tamano_respuesta": 3.33
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Ha ocurrido un incidente leve en la sección de fundición: un operario sufrió una quemadura superficial por no llevar los guantes reglamentarios de protección térmica. El supervisor quiere sancionarlo de inmediato, pero el trabajador alega que el almacén de EPIs no tenía su talla esa mañana. ¿Cómo debes gestionar esta situación desde el punto de vista de RRHH para equilibrar la disciplina, la seguridad y la responsabilidad legal de la empresa?",
+    "model": "mistral:7b",
+    "latency_s": 4.709077835083008,
+    "prompt_tokens": 141,
+      "concretitud": 2.5,
+      "especificacion": 5.04,
+      "criticidad": 10.0,
+      "tamano_respuesta": 4.23
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Redacta un anuncio breve para los tablones de la fábrica comunicando una parada técnica obligatoria de 3 días por mantenimiento de la línea de producción.",
+    "model": "llama3.2:3b",
+    "latency_s": 3.111304998397827,
+    "prompt_tokens": 65,
+      "concretitud": 0.0,
+      "especificacion": 4.0,
+      "criticidad": 2.5,
+      "tamano_respuesta": 2.5
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "La encuesta de clima laboral revela una fuerte resistencia al cambio y desmotivación en el equipo tradicional de mecánicos de motores de combustión, debido a la progresiva transición de la fábrica hacia la producción exclusiva de vehículos eléctricos. ¿Qué acciones formativas o de comunicación interna propones para mitigar este miedo?",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.1797146797180176,
+    "prompt_tokens": 121,
+      "concretitud": 0.0,
+      "especificacion": 4.66,
+      "criticidad": 2.5,
+      "tamano_respuesta": 3.6
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Transforma una evaluación de desempeño muy técnica e individual de un supervisor de planta en un resumen ejecutivo de tres puntos clave para la dirección de RRHH.",
+    "model": "llama3.2:3b",
+    "latency_s": 2.506769895553589,
+    "prompt_tokens": 62,
+      "concretitud": 0.0,
+      "especificacion": 1.62,
+      "criticidad": 0.0,
+      "tamano_respuesta": 2.7
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Analiza el siguiente caso de un Team Leader de control de calidad: cumple con todos los objetivos de la auditoría de producto (cero fallos), pero su equipo tiene la tasa de rotación voluntaria más alta de la fábrica. ¿Cuál es tu diagnóstico y qué plan de acción sugieres?",
+    "model": "mistral:7b",
+    "latency_s": 4.767856597900391,
+    "prompt_tokens": 83,
+      "concretitud": 0.0,
+      "especificacion": 4.62,
+      "criticidad": 5.0,
+      "tamano_respuesta": 6.04
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "¿Cuántos días de vacaciones le corresponden por convenio a un ingeniero informático en España?",
+    "model": "llama3.2:3b",
+    "latency_s": 2.0441465377807617,
+    "prompt_tokens": 48,
+      "concretitud": 5.0,
+      "especificacion": 0.84,
+      "criticidad": 0.0,
+      "tamano_respuesta": 1.4
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Redacta un aviso SMS de cambio de turno de mañana a noche para la Línea 2. Se diplomático, amable y people person.",
+    "model": "llama3.2:3b",
+    "latency_s": 2.889420986175537,
+    "prompt_tokens": 58,
+      "concretitud": 0.0,
+      "especificacion": 1.32,
+      "criticidad": 0.0,
+      "tamano_respuesta": 4.7
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Escribe una felicitación breve a la Línea 1 por batir el récord diario de producción. No muy cordial.",
+    "model": "llama3.2:3b",
+    "latency_s": 2.9239466190338135,
+    "prompt_tokens": 55,
+      "concretitud": 0.0,
+      "especificacion": 3.58,
+      "criticidad": 2.5,
+      "tamano_respuesta": 1.8
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Redacta la respuesta automática de RRHH para dudas comunes sobre el ingreso de la paga extra.",
+    "model": "llama3.2:3b",
+    "latency_s": 2.813920021057129,
+    "prompt_tokens": 50,
+      "concretitud": 0.0,
+      "especificacion": 0.96,
+      "criticidad": 0.0,
+      "tamano_respuesta": 4.1
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Un Jefe de Turno clave, con 15 años de experiencia y un conocimiento profundo de la maquinaria pesada, está mostrando un rendimiento bajo y actitudes apáticas desde que se digitalizó el sistema de reporte de incidencias (MES/SAP). Los objetivos de su turno están cayendo. ¿Cómo enfocarías una entrevista de desarrollo con él para recuperar su motivación sin que sienta que sus años de experiencia ya no valen nada?",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 1.126734733581543,
+    "prompt_tokens": 140,
+      "concretitud": 2.5,
+      "especificacion": 4.98,
+      "criticidad": 0.0,
+      "tamano_respuesta": 6.64
+    
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Un operario del taller de pintura solicita cambiar su turno de noche del viernes por el de mañana del sábado. Redacta la respuesta oficial denegando la solicitud basándote en los tiempos mínimos de descanso que exige el convenio, que ya ha sobrepasado.",
+    "model": "llama-3.1-8b-instant",
+    "latency_s": 0.8887972831726074,
+    "prompt_tokens": 63,
+      "concretitud": 0.0,
+      "especificacion": 4.52,
+      "criticidad": 0.0,
+      "tamano_respuesta": 5.86
+  },
+  {
+    "departamento": "RRHH",
+    "query": "Cual es la mejor forma de bajar el sueldo a cuatro trabajadores de control de calidad en una planta automotriz (tienen mucha compenetración y camaradería) minimizando las posibles repercusiones negativas.",
+    "model": "llama3.2:3b",
+    "latency_s": 2.8066365718841553,
+    "prompt_tokens": 76,
+      "concretitud": 0.0,
+      "especificacion": 1.8,
+      "criticidad": 0.0,
+      "tamano_respuesta": 5.5
+    
+  }
+]
