@@ -124,10 +124,10 @@ def get_forecast_data(role_filter=None):
         # Custom ARIMA(1,1,0) / Autoregressive lag-1 difference fallback
         if len(y) >= 4:
             diffs = np.diff(y)
-            diff_mean = np.mean(diffs)
+            diff_mean = 0.0
             
             # Estimate lag-1 autocorrelation (phi) of differences
-            diffs_zero_mean = diffs - diff_mean
+            diffs_zero_mean = diffs
             var = np.sum(diffs_zero_mean**2)
             if var > 1e-9:
                 cov = np.sum(diffs_zero_mean[1:] * diffs_zero_mean[:-1])
@@ -136,17 +136,17 @@ def get_forecast_data(role_filter=None):
             else:
                 phi = 0.0
                 
-            # Forecast increments using: diff_t = diff_mean + phi * (diff_{t-1} - diff_mean)
+            # Forecast increments using: diff_t = phi * diff_{t-1}
             last_diff = diffs[-1]
             current_diff = last_diff
             
             last_y_val = y[-1]
             for _ in range(n_forecast):
-                current_diff = diff_mean + phi * (current_diff - diff_mean)
+                current_diff = phi * current_diff
                 next_val = last_y_val + current_diff
                 # Ensure it doesn't drop below 0
                 next_val = max(0.0, next_val)
-                forecast_increments.append(next_val - last_y_val)
+                forecast_increments.append(next_val)
                 last_y_val = next_val
             model_used = "custom.ARIMA(1,1,0)"
         else:
