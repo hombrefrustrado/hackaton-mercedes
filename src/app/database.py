@@ -55,6 +55,7 @@ def init_db():
         Modelo VARCHAR,
         Num_tokens_out NUMERIC,
         Num_tokens_in NUMERIC,
+        latency_ms INTEGER DEFAULT 0,
         PRIMARY KEY (Usuario, Fecha),
         FOREIGN KEY (Usuario) REFERENCES Usuario(Email),
         FOREIGN KEY (Modelo) REFERENCES Modelo(Nombre)
@@ -90,6 +91,12 @@ def init_db():
     # Alter Rol table if database already exists (safety migration)
     try:
         cursor.execute("ALTER TABLE Rol ADD COLUMN alert_threshold NUMERIC DEFAULT 0.8")
+    except Exception:
+        pass
+
+    # Alter Query table if database already exists (safety migration)
+    try:
+        cursor.execute("ALTER TABLE Query ADD COLUMN latency_ms INTEGER DEFAULT 0")
     except Exception:
         pass
 
@@ -153,6 +160,7 @@ def get_state():
         SELECT q.rowid as id, q.Fecha as timestamp, q.Usuario as user_id, 
                u.nombre as user_name, r.nombre as role_name, q.Modelo as model,
                q.Num_tokens_in as prompt_tokens, q.Num_tokens_out as completion_tokens,
+               q.latency_ms as latency_ms,
                (q.Num_tokens_in * m.cpt_in + q.Num_tokens_out * m.cpt_out) as cost
         FROM Query q
         JOIN Usuario u ON q.Usuario = u.Email
@@ -171,7 +179,7 @@ def get_state():
             "prompt_tokens": r["prompt_tokens"],
             "completion_tokens": r["completion_tokens"],
             "cost": r["cost"],
-            "latency_ms": 0,       # No guardado en el esquema actual (mockeado para UI)
+            "latency_ms": r["latency_ms"] if r["latency_ms"] is not None else 0,
             "stream": False        # No guardado en el esquema actual (mockeado para UI)
         })
         
@@ -266,8 +274,8 @@ def record_transaction(user_id: str, model: str, prompt_tokens: int, completion_
     # ¡Ojo! El trigger 'trg_actualizar_cuota_usuario' se encargará automáticamente de actualizar la cuota del usuario.
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     cursor.execute(
-        "INSERT INTO Query (Usuario, Fecha, Consulta, Modelo, Num_tokens_out, Num_tokens_in) VALUES (?, ?, ?, ?, ?, ?)",
-        (user_id, timestamp, "API Proxy Request", model, completion_tokens, prompt_tokens)
+        "INSERT INTO Query (Usuario, Fecha, Consulta, Modelo, Num_tokens_out, Num_tokens_in, latency_ms) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (user_id, timestamp, "API Proxy Request", model, completion_tokens, prompt_tokens, int(latency))
     )
         
     conn.commit()
