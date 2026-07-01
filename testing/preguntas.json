@@ -6,7 +6,83 @@
     },
     {
         "departamento":"desarrollo",
-        "query":"como hago una app"
+        "query":"¿Por qué me da este error en Docker: com.docker.backend.exe exit code -1 al levantar el contenedor de la base de datos? ¿Cómo lo soluciono?"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"Tengo un NullPointerException en Java al intentar mapear este JSON con Jackson. ¿Qué suele causar esto?"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"¿Qué significa el código de estado HTTP 422 Unprocessable Entity y en qué casos debería devolverlo mi API en lugar de un 400?"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"Tengo fugas de memoria (memory leaks) en una aplicación de Node.js en producción. ¿Qué herramientas me recomiendas para hacer un perfilado (profiling) del heap?"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"Escribe una función en Python usando FastAPI para subir un archivo CSV, validar que tenga las columnas 'email' y 'nombre' usando Pydantic, y guardarlo en un bucket de AWS S3."
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"Refactoriza este componente de React para cambiarlo de Class Component a Functional Component usando Hooks (useState y useEffect): [Inserta aquí un código de 50 líneas]"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"Genera un script en Bash que busque todos los archivos .log en el directorio /var/log modificados en las últimas 24 horas y los comprima en un archivo .tar.gz enviado por SSH a otro servidor"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"Escribe un archivo docker-compose.yml para un entorno de desarrollo local que incluya un contenedor de PostgreSQL con persistencia de datos, un Redis y una app en Node.js."
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"¿Cómo puedo optimizar esta consulta SQL que tarda demasiado haciendo un LEFT JOIN entre dos tablas de millones de registros? SELECT u.email, q.fecha FROM Usuario u LEFT JOIN Query q ON u.email = q.Usuario WHERE q.fecha > '2026-01-01';"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"Explica cómo implementar una estrategia de caché tipo Cache-Aside en Redis para una aplicación de catálogo de productos."
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"¿Cuáles son las mejores prácticas para reducir el tamaño de una imagen Docker de una aplicación Go para producción utilizando multi-stage builds?"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"Diseña una arquitectura orientada a eventos (Event-Driven) para un sistema de notificaciones masivas en tiempo real usando Apache Kafka y WebSockets"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"¿Cuándo es mejor usar una base de datos NoSQL como MongoDB en lugar de una relacional como PostgreSQL para el backend de un e-commerce?"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"Explica el patrón de diseño Saga y cómo ayuda a manejar transacciones distribuidas en una arquitectura de microservicios sin perder la consistencia"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"Escribe los tests unitarios con Jest y React Testing Library para un componente de formulario de login que maneja errores de credenciales"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"Genera la documentación técnica en formato Markdown para una API REST con un endpoint POST /api/v1/queries que reciba un JSON con usuario y modelo."
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"¿Cómo puedo hacer un mock de una llamada HTTP externa usando la librería unittest.mock en Python para que mis tests no dependan de internet?"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"¿Cuál es la diferencia exacta entre useEffect y useLayoutEffect en React? Ponme un ejemplo práctico de cuándo el renderizado visual se rompería si uso el incorrecto."
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"Este componente de React se vuelve extremadamente lento y se re-renderiza con cada pulsación de tecla en el buscador. ¿Cómo puedo optimizarlo usando useMemo, useCallback o React.memo? Aquí está el código: [Inserta un componente con una lista grande mapeada y un input de texto]"
+    },
+    {
+        "departamento":"desarrollo",
+        "query":"Mi aplicación web tiene un indicador INP (Interaction to Next Paint) pésimo en Google Lighthouse. ¿Qué estrategias en JavaScript puedo usar para romper tareas largas (long tasks) y liberar el hilo principal?"
     },
     {
         "departamento":"RRHH",
