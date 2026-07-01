@@ -13,7 +13,7 @@
                 <select id="config-consumer" onchange="loadConfigForm()">
                     <option value="marketing">Marketing</option>
                     <option value="desarrollo">Desarrollo</option>
-                    <option value="RRHH">RRHH</option>
+                    <option value="rrhh">RRHH</option>
                 </select>
             </div>
             <div class="config-grid">
@@ -72,9 +72,9 @@
                     <label for="select-forecast-role">Filtrar Proyección por Rol</label>
                     <select id="select-forecast-role" onchange="updateForecastChart()">
                         <option value="todos">Todos los Roles (Consolidado)</option>
-                        <option value="marketing">Marketing (Ana)</option>
-                        <option value="desarrollo">Desarrollo (Carlos)</option>
-                        <option value="rrhh">RRHH (Paco)</option>
+                        <option value="marketing">Marketing</option>
+                        <option value="desarrollo">Desarrollo</option>
+                        <option value="rrhh">RRHH</option>
                     </select>
                 </div>
                 <div id="forecast-status-badge" style="margin-top: 1rem;"></div>
@@ -147,7 +147,7 @@
     }
 
     function loadConfigForm() {
-        const id = document.getElementById("config-consumer").value;
+        const id = document.getElementById("config-consumer").value.toLowerCase();
         const consumer = state.consumers[id];
         if (!consumer) return;
         
@@ -156,7 +156,7 @@
     }
 
     async function saveConfig() {
-        const id = document.getElementById("config-consumer").value;
+        const id = document.getElementById("config-consumer").value.toLowerCase();
         const limit = parseFloat(document.getElementById("config-limit").value);
         const threshold = parseFloat(document.getElementById("config-threshold").value) / 100;
         
