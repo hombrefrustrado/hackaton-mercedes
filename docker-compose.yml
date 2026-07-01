@@ -1,0 +1,47 @@
+services:
+  # Provider A — Ollama serving llama3.2:3b (simulates a cheap, fast model)
+  ollama-provider-a:
+    image: ollama/ollama:latest
+    container_name: ollama-provider-a
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_provider_a:/root/.ollama
+    networks:
+      ai_finops_network:
+        aliases:
+          - provider-a.ai.local
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Provider B — Ollama serving mistral:7b (simulates a more capable, pricier model)
+  # Runs on a separate port to simulate a distinct provider API
+  ollama-provider-b:
+    image: ollama/ollama:latest
+    container_name: ollama-provider-b
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama_provider_b:/root/.ollama
+    networks:
+      ai_finops_network:
+        aliases:
+          - provider-b.ai.local
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  ollama_provider_a:
+  ollama_provider_b:
+
+networks:
+  ai_finops_network:
+    driver: bridge
