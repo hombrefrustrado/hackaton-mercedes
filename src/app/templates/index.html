@@ -1,878 +1,163 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI FinOps Gateway - Panel de Control</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        /* Vanilla CSS - Design System */
-        :root {
-            --bg-color: #030712;
-            --panel-bg: rgba(17, 24, 39, 0.7);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            --text-muted: #6b7280;
-            
-            /* Curated palette */
-            --accent-primary: #8b5cf6;
-            --accent-primary-glow: rgba(139, 92, 246, 0.35);
-            --accent-success: #10b981;
-            --accent-success-glow: rgba(16, 185, 129, 0.25);
-            --accent-warning: #f59e0b;
-            --accent-warning-glow: rgba(245, 158, 11, 0.25);
-            --accent-danger: #ef4444;
-            --accent-danger-glow: rgba(239, 68, 68, 0.25);
-            
-            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
+{% extends "base.html" %}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
-                radial-gradient(at 50% 100%, rgba(30, 27, 75, 0.4) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 40%);
-            background-attachment: fixed;
-            color: var(--text-primary);
-            font-family: var(--font-family);
-            min-height: 100vh;
-            line-height: 1.5;
-            padding: 2rem;
-        }
-
-        /* Container */
-        .app-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        /* Header */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .logo-section h1 {
-            font-size: 2.2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #fff 30%, #a78bfa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.025em;
-        }
-
-        .logo-section p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-top: 0.25rem;
-        }
-
-        .system-status {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            background: var(--panel-bg);
-            backdrop-filter: blur(12px);
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            border: 1px solid var(--border-color);
-        }
-
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .status-indicator.online {
-            background-color: var(--accent-success);
-            box-shadow: 0 0 8px var(--accent-success);
-        }
-
-        .status-indicator.offline {
-            background-color: var(--accent-danger);
-            box-shadow: 0 0 8px var(--accent-danger);
-        }
-
-        /* Main Dashboard Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1.1fr 1.9fr;
-            gap: 2rem;
-        }
-
-        @media (max-width: 1024px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Cards & Glass Panels */
-        .glass-card {
-            background: var(--panel-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-            transition: var(--transition-smooth);
-        }
-
-        .glass-card:hover {
-            border-color: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.5);
-        }
-
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: #fff;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 0.75rem;
-        }
-
-        .card-title span.badge {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.6rem;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-secondary);
-        }
-
-        /* Form Controls */
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        select, textarea, input[type="text"], input[type="number"] {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-family: var(--font-family);
-            font-size: 0.95rem;
-            padding: 0.75rem;
-            outline: none;
-            transition: var(--transition-smooth);
-            width: 100%;
-        }
-
-        select:focus, textarea:focus, input:focus {
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 2px var(--accent-primary-glow);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        /* Budget Bars */
-        .budget-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        .budget-item {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .budget-header {
-            display: flex;
-            justify-space: space-between;
-            font-size: 0.95rem;
-            justify-content: space-between;
-        }
-
-        .budget-name {
-            font-weight: 600;
-        }
-
-        .budget-spend {
-            font-weight: 500;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .progress-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 9999px;
-            height: 12px;
-            overflow: hidden;
-            width: 100%;
-            position: relative;
-        }
-
-        .progress-bar {
-            height: 100%;
-            border-radius: 9999px;
-            width: 0%;
-            transition: width 0.5s ease-out;
-            background: linear-gradient(90deg, var(--accent-primary), #a78bfa);
-        }
-
-        .progress-bar.success {
-            background: linear-gradient(90deg, var(--accent-success), #34d399);
-        }
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Panel Izquierdo: Métricas y Configuración -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
         
-        .progress-bar.warning {
-            background: linear-gradient(90deg, var(--accent-warning), #fbbf24);
-        }
+        <!-- Presupuestos de Equipos -->
+        <div class="glass-card">
+            <div class="card-title">
+                Presupuesto por Consumidor
+                <span class="badge">Límites Activos</span>
+            </div>
+            <div class="budget-list" id="budget-container">
+                <div class="budget-item">
+                    <div class="budget-header">
+                        <span class="budget-name">Cargando...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configurar Límites -->
+        <div class="glass-card">
+            <div class="card-title">Configuración de Gobernanza</div>
+            <div class="form-group">
+                <label for="config-consumer">Rol / Equipo</label>
+                <select id="config-consumer" onchange="loadConfigForm()">
+                    <option value="marketing">Marketing</option>
+                    <option value="desarrollo">Desarrollo</option>
+                    <option value="RRHH">RRHH</option>
+                </select>
+            </div>
+            <div class="config-grid">
+                <div class="form-group">
+                    <label for="config-limit">Límite ($)</label>
+                    <input type="number" id="config-limit" step="0.5" min="0.1" value="5.0">
+                </div>
+                <div class="form-group">
+                    <label for="config-threshold">Umbral Alerta (%)</label>
+                    <input type="number" id="config-threshold" step="5" min="10" max="100" value="80">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" style="flex-grow:1;" onclick="saveConfig()">Actualizar Reglas</button>
+                <button class="btn btn-secondary btn-danger" onclick="resetDb()" title="Reiniciar base de datos de transacciones">Reset</button>
+            </div>
+        </div>
+
+        <!-- Alertas del Sistema -->
+        <div class="glass-card">
+            <div class="card-title">
+                Alertas FinOps
+                <span class="badge" id="alert-count">0</span>
+            </div>
+            <div class="alert-panel" id="alert-panel">
+                <div class="alert-empty">No hay alertas activas en este periodo.</div>
+            </div>
+        </div>
         
-        .progress-bar.danger {
-            background: linear-gradient(90deg, var(--accent-danger), #f87171);
-            box-shadow: 0 0 8px var(--accent-danger);
-        }
-
-        /* Buttons */
-        .btn {
-            background: var(--accent-primary);
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            cursor: pointer;
-            font-family: var(--font-family);
-            font-size: 0.95rem;
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            transition: var(--transition-smooth);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .btn:hover {
-            background: #7c3aed;
-            box-shadow: 0 0 16px var(--accent-primary-glow);
-            transform: translateY(-1px);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: none;
-        }
-
-        .btn-danger {
-            background: var(--accent-danger);
-        }
-        .btn-danger:hover {
-            background: #dc2626;
-            box-shadow: 0 0 16px var(--accent-danger-glow);
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        /* Toggle switches */
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 44px;
-            height: 24px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(255, 255, 255, 0.1);
-            transition: .3s;
-            border-radius: 24px;
-            border: 1px solid var(--border-color);
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--accent-primary);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(20px);
-        }
-
-        /* Alert Panel */
-        .alert-panel {
-            max-height: 200px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .alert-item {
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .alert-item.warning {
-            background: rgba(245, 158, 11, 0.1);
-            border-left: 4px solid var(--accent-warning);
-            color: #fef3c7;
-        }
-
-        .alert-item.danger {
-            background: rgba(239, 68, 68, 0.1);
-            border-left: 4px solid var(--accent-danger);
-            color: #fee2e2;
-        }
-
-        .alert-empty {
-            color: var(--text-muted);
-            text-align: center;
-            font-size: 0.9rem;
-            padding: 1rem;
-            border: 1px dashed var(--border-color);
-            border-radius: 8px;
-        }
-
-        /* Model Selector pricing badge info */
-        .pricing-info {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-top: -0.25rem;
-            padding-left: 0.25rem;
-        }
-
-        /* Output screen */
-        .output-container {
-            flex-grow: 1;
-            background: rgba(10, 15, 30, 0.85);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1rem;
-            min-height: 200px;
-            max-height: 400px;
-            overflow-y: auto;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.95rem;
-            white-space: pre-wrap;
-            position: relative;
-            color: #e5e7eb;
-        }
-
-        .output-placeholder {
-            color: var(--text-muted);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            width: 80%;
-            font-family: var(--font-family);
-        }
-
-        .output-meta {
-            display: flex;
-            gap: 1.5rem;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 6px;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            justify-content: space-between;
-        }
-
-        .output-meta span {
-            font-variant-numeric: tabular-nums;
-        }
-
-        .meta-saving {
-            color: var(--accent-success);
-            font-weight: 600;
-        }
-
-        /* Config grid */
-        .config-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        /* Table log */
-        .history-card {
-            margin-top: 1rem;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-            width: 100%;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.9rem;
-        }
-
-        th {
-            color: var(--text-secondary);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        td {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            color: var(--text-primary);
-            font-variant-numeric: tabular-nums;
-        }
-
-        tr:hover td {
-            background: rgba(255, 255, 255, 0.01);
-        }
-
-        .tx-cost {
-            font-weight: 600;
-            color: #fff;
-        }
-        
-        .tx-badge {
-            font-size: 0.75rem;
-            padding: 0.15rem 0.4rem;
-            border-radius: 4px;
-            font-weight: 600;
-        }
-
-        .tx-badge.llama {
-            background: rgba(139, 92, 246, 0.15);
-            color: #c084fc;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-        }
-
-        .tx-badge.mistral {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fcd34d;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .tx-badge.groq {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        /* Tips panel */
-        .tips-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .tip-item {
-            background: rgba(16, 185, 129, 0.05);
-            border: 1px solid rgba(16, 185, 129, 0.15);
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: #d1fae5;
-        }
-
-        .tip-icon {
-            font-size: 1.25rem;
-            color: var(--accent-success);
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Custom Scrollbars */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-    </style>
-</head>
-<body>
-
-<div class="app-container">
-    <header>
-        <div class="logo-section">
-            <h1>AI FinOps Gateway</h1>
-            <p>Monitoreo de costes, gobernanza y enrutamiento inteligente en tiempo real (Flask)</p>
-        </div>
-        <div class="system-status">
-            <div class="status-badge" id="provider-a-badge">
-                <span class="status-indicator online"></span>
-                Llama 3.2:3B: <span id="provider-a-latency">...</span>
-            </div>
-            <div class="status-badge" id="provider-b-badge">
-                <span class="status-indicator online"></span>
-                Mistral 7B: <span id="provider-b-latency">...</span>
-            </div>
-            <div class="status-badge" id="provider-c-badge">
-                <span class="status-indicator online"></span>
-                Groq 8B: <span id="provider-c-latency">...</span>
+        <!-- Recomendaciones de Ahorro -->
+        <div class="glass-card">
+            <div class="card-title">Recomendador de Optimización</div>
+            <div class="tips-list" id="tips-panel">
+                <div class="tip-item">
+                    <span class="tip-icon">💡</span>
+                    <span>Analizando tus patrones de tráfico para sugerir enrutamiento alternativo...</span>
+                </div>
             </div>
         </div>
-    </header>
 
-    <div class="dashboard-grid">
-        <!-- Panel Izquierdo: Métricas y Configuración -->
-        <div style="display: flex; flex-direction: column; gap: 2rem;">
-            
-            <!-- Presupuestos de Equipos -->
-            <div class="glass-card">
-                <div class="card-title">
-                    Presupuesto por Consumidor
-                    <span class="badge">Límites Activos</span>
-                </div>
-                <div class="budget-list" id="budget-container">
-                    <div class="budget-item">
-                        <div class="budget-header">
-                            <span class="budget-name">Ana (Marketing)</span>
-                            <span class="budget-spend">$0.0000 / $5.00</span>
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-bar success" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Configurar Límites -->
-            <div class="glass-card">
-                <div class="card-title">Configuración de Gobernanza</div>
-                <div class="form-group">
-                    <label for="config-consumer">Rol / Equipo</label>
-                    <select id="config-consumer" onchange="loadConfigForm()">
-                        <option value="marketing">Marketing</option>
-                        <option value="producto">Producto</option>
-                        <option value="general">General</option>
-                    </select>
-                </div>
-                <div class="config-grid">
-                    <div class="form-group">
-                        <label for="config-limit">Límite ($)</label>
-                        <input type="number" id="config-limit" step="0.5" min="0.1" value="5.0">
-                    </div>
-                    <div class="form-group">
-                        <label for="config-threshold">Umbral Alerta (%)</label>
-                        <input type="number" id="config-threshold" step="5" min="10" max="100" value="80">
-                    </div>
-                </div>
-                <div class="btn-group">
-                    <button class="btn" style="flex-grow:1;" onclick="saveConfig()">Actualizar Reglas</button>
-                    <button class="btn btn-secondary btn-danger" onclick="resetDb()" title="Reiniciar base de datos de transacciones">Reset</button>
-                </div>
-            </div>
-
-            <!-- Alertas del Sistema -->
-            <div class="glass-card">
-                <div class="card-title">
-                    Alertas FinOps
-                    <span class="badge" id="alert-count">0</span>
-                </div>
-                <div class="alert-panel" id="alert-panel">
-                    <div class="alert-empty">No hay alertas activas en este periodo.</div>
-                </div>
-            </div>
-            
-            <!-- Recomendaciones de Ahorro -->
-            <div class="glass-card">
-                <div class="card-title">Recomendador de Optimización</div>
-                <div class="tips-list" id="tips-panel">
-                    <div class="tip-item">
-                        <span class="tip-icon">💡</span>
-                        <span>Analizando tus patrones de tráfico para sugerir enrutamiento alternativo...</span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Panel Derecho: Playground Interactivo -->
-        <div style="display: flex; flex-direction: column; gap: 2rem;">
-            
-            <div class="glass-card" style="flex-grow: 1;">
-                <div class="card-title">Playground de Solicitudes</div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label for="select-model">Modelo de IA (Enrutamiento)</label>
-                        <select id="select-model" onchange="updatePricingBadge()">
-                            <option value="llama3.2:3b">Llama 3.2 3B (Local - Rápido)</option>
-                            <option value="mistral:7b">Mistral 7B (Local - Calidad)</option>
-                            <option value="llama-3.1-8b-instant">Llama 3.1 8B (Groq Cloud)</option>
-                        </select>
-                        <div class="pricing-info" id="pricing-badge"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="select-consumer">Nombre de Usuario (Consumidor)</label>
-                        <select id="select-consumer">
-                            <option value="ana">Ana (Límite: $5.00)</option>
-                            <option value="carlos">Carlos (Límite: $10.00)</option>
-                            <option value="default">Usuario Genérico (Límite: $2.00)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="prompt-input">Mensaje</label>
-                    <textarea id="prompt-input" placeholder="Escribe tu prompt para enviar al modelo a través de la capa de control de costes..."></textarea>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <label class="toggle-container">
-                        <span class="switch">
-                            <input type="checkbox" id="stream-toggle" checked>
-                            <span class="slider"></span>
-                        </span>
-                        <span>Respuesta en Streaming (SSE)</span>
-                    </label>
-                    
-                    <button class="btn" id="send-btn" onclick="sendPrompt()">
-                        <span>Enviar a la API</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
-                </div>
-
-                <div class="form-group">
-                    <label>Respuesta del Modelo</label>
-                    <div class="output-container" id="output-box">
-                        <div class="output-placeholder">El texto de respuesta se mostrará aquí una vez que realices una petición.</div>
-                    </div>
-                </div>
-
-                <div class="output-meta" style="display: none;" id="meta-container">
-                    <div>Tokens: <span id="meta-tokens">0 / 0</span></div>
-                    <div>Latencia: <span id="meta-latency">0 ms</span></div>
-                    <div>Coste de Llamada: <span id="meta-cost">$0.0000</span></div>
-                    <div class="meta-saving" id="meta-saving"></div>
-                </div>
-
-            </div>
-
-        </div>
     </div>
 
-    <!-- Historial de Transacciones (Audit Log) -->
-    <div class="glass-card history-card">
-        <div class="card-title">
-            Registro de Auditoría y Transacciones
-            <span class="badge" id="tx-count">0 Peticiones</span>
+    <!-- Panel Derecho: Playground Interactivo -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <div class="glass-card" style="flex-grow: 1;">
+            <div class="card-title">Playground de Solicitudes</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="select-model">Modelo de IA (Enrutamiento)</label>
+                    <select id="select-model" onchange="updatePricingBadge()">
+                        <option value="auto">🤖 Enrutamiento Automático (Auto-routing)</option>
+                        <option value="llama3.2:3b">Llama 3.2 3B (Local - Rápido)</option>
+                        <option value="mistral:7b">Mistral 7B (Local - Calidad)</option>
+                        <option value="llama-3.1-8b-instant">Llama 3.1 8B (Groq Cloud)</option>
+                    </select>
+                    <div class="pricing-info" id="pricing-badge"></div>
+                </div>
+                <div class="form-group">
+                    <label for="select-consumer">Nombre de Usuario (Consumidor)</label>
+                    <select id="select-consumer">
+                        <option value="ana">Ana (Marketing - Límite: $5.00)</option>
+                        <option value="carlos">Carlos (Desarrollo - Límite: $10.00)</option>
+                        <option value="paco">Paco (RRHH - Límite: $2.00)</option>
+                        <option value="default">Usuario Genérico (Límite: $2.00)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="prompt-input">Mensaje</label>
+                <textarea id="prompt-input" placeholder="Escribe tu prompt para enviar al modelo a través de la capa de control de costes..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label class="toggle-container">
+                    <span class="switch">
+                        <input type="checkbox" id="stream-toggle" checked>
+                        <span class="slider"></span>
+                    </span>
+                    <span>Respuesta en Streaming (SSE)</span>
+                </label>
+                
+                <button class="btn" id="send-btn" onclick="sendPrompt()">
+                    <span>Enviar a la API</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label>Respuesta del Modelo</label>
+                <div class="output-container" id="output-box">
+                    <div class="output-placeholder">El texto de respuesta se mostrará aquí una vez que realices una petición.</div>
+                </div>
+            </div>
+
+            <div class="output-meta" style="display: none;" id="meta-container">
+                <div>Tokens: <span id="meta-tokens">0 / 0</span></div>
+                <div>Latencia: <span id="meta-latency">0 ms</span></div>
+                <div>Coste de Llamada: <span id="meta-cost">$0.0000</span></div>
+                <div class="meta-saving" id="meta-saving"></div>
+            </div>
+
         </div>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Timestamp</th>
-                        <th>Consumidor</th>
-                        <th>Modelo</th>
-                        <th>Tokens (In/Out)</th>
-                        <th>Latencia</th>
-                        <th>Coste ($)</th>
-                        <th>Formato</th>
-                    </tr>
-                </thead>
-                <tbody id="history-body">
-                    <tr>
-                        <td colspan="7" style="text-align: center; color: var(--text-muted);">No se han registrado transacciones todavía.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+
     </div>
 </div>
 
 <script>
-    // State management
-    let state = {
-        consumers: {},
-        transactions: [],
-        alerts: []
-    };
-
-    // Prices mapping for local calculations
-    const pricing = {
-        "llama3.2:3b": { input: 0.06, output: 0.06, label: "A (Local)" },
-        "mistral:7b": { input: 0.24, output: 0.24, label: "B (Local)" },
-        "llama-3.1-8b-instant": { input: 0.05, output: 0.08, label: "C (Groq)" }
-    };
-
-    // Initialize Page
-    document.addEventListener("DOMContentLoaded", () => {
+    function initPageSpecific() {
         updatePricingBadge();
-        refreshState();
-        checkHealth();
-        
-        loadConfigForm();
-
-        // Refresh state and health periodically
-        setInterval(refreshState, 5000);
-        setInterval(checkHealth, 10000);
-    });
+        setTimeout(loadConfigForm, 500); // Allow state to load first
+    }
 
     function updatePricingBadge() {
         const model = document.getElementById("select-model").value;
-        const prices = pricing[model];
         const badge = document.getElementById("pricing-badge");
-        badge.innerHTML = `Precio: In $${prices.input}/1M · Out $${prices.output}/1M tokens`;
-    }
-
-    async function checkHealth() {
-        try {
-            const res = await fetch("/api/finops/health");
-            if (!res.ok) return;
-            const health = await res.json();
-            
-            updateBadgeHealth("provider-a", health["llama3.2:3b"]);
-            updateBadgeHealth("provider-b", health["mistral:7b"]);
-            updateBadgeHealth("provider-c", health["llama-3.1-8b-instant"]);
-        } catch (e) {
-            console.error("Health check error:", e);
-        }
-    }
-
-    function updateBadgeHealth(id, data) {
-        const badge = document.getElementById(`${id}-badge`);
-        const latencySpan = document.getElementById(`${id}-latency`);
-        const indicator = badge.querySelector(".status-indicator");
-        
-        if (data.status === "online") {
-            indicator.className = "status-indicator online";
-            latencySpan.innerText = `${data.latency_ms}ms`;
-        } else if (data.status === "error") {
-            indicator.className = "status-indicator warning";
-            indicator.style.backgroundColor = "var(--accent-warning)";
-            indicator.style.boxShadow = "0 0 8px var(--accent-warning)";
-            latencySpan.innerText = "Error";
+        if (model === "auto") {
+            badge.innerHTML = `Precio: Dinámico · Enrutado por árbol de decisión (Por defecto Llama 3.2:3B)`;
         } else {
-            indicator.className = "status-indicator offline";
-            latencySpan.style.backgroundColor = "var(--accent-danger)";
-            latencySpan.style.boxShadow = "0 0 8px var(--accent-danger)";
-            latencySpan.innerText = "Offline";
-        }
-    }
-
-    async function refreshState() {
-        try {
-            const res = await fetch("/api/finops/state");
-            if (!res.ok) return;
-            state = await res.json();
-            
-            renderBudgets();
-            renderAlerts();
-            renderHistory();
-            renderRecommendations();
-        } catch (e) {
-            console.error("Error refreshing state:", e);
+            const prices = pricing[model];
+            badge.innerHTML = `Precio: In $${prices.input}/1M · Out $${prices.output}/1M tokens`;
         }
     }
 
     function renderBudgets() {
         const container = document.getElementById("budget-container");
+        if (!container) return;
         container.innerHTML = "";
         
         for (const [id, consumer] of Object.entries(state.consumers)) {
@@ -890,7 +175,7 @@
             container.innerHTML += `
                 <div class="budget-item">
                     <div class="budget-header">
-                        <span class="budget-name">${consumer.name} (${consumer.role})</span>
+                        <span class="budget-name">${consumer.name}</span>
                         <span class="budget-spend">$${spent.toFixed(4)} / $${limit.toFixed(2)} (${pct.toFixed(1)}%)</span>
                     </div>
                     <div class="progress-container">
@@ -904,6 +189,7 @@
     function renderAlerts() {
         const countBadge = document.getElementById("alert-count");
         const panel = document.getElementById("alert-panel");
+        if (!panel) return;
         
         countBadge.innerText = state.alerts.length;
         
@@ -926,38 +212,9 @@
         }).reverse().join("");
     }
 
-    function renderHistory() {
-        const body = document.getElementById("history-body");
-        const countBadge = document.getElementById("tx-count");
-        
-        countBadge.innerText = `${state.transactions.length} Petición${state.transactions.length !== 1 ? 'es' : ''}`;
-        
-        if (state.transactions.length === 0) {
-            body.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No se han registrado transacciones todavía.</td></tr>`;
-            return;
-        }
-        
-        body.innerHTML = state.transactions.map(tx => {
-            let badgeClass = "llama";
-            if (tx.model.includes("mistral")) badgeClass = "mistral";
-            else if (tx.model.includes("groq") || tx.model.includes("instant")) badgeClass = "groq";
-            
-            return `
-                <tr>
-                    <td>${tx.timestamp}</td>
-                    <td><strong style="color:#fff">${tx.consumer_name}</strong></td>
-                    <td><span class="tx-badge ${badgeClass}">${tx.model}</span></td>
-                    <td>In: ${tx.prompt_tokens} / Out: ${tx.completion_tokens}</td>
-                    <td>${tx.latency_ms} ms</td>
-                    <td class="tx-cost">$${tx.cost.toFixed(5)}</td>
-                    <td style="color:var(--text-muted)">${tx.stream ? 'Stream' : 'Standard'}</td>
-                </tr>
-            `;
-        }).reverse().join("");
-    }
-
     function renderRecommendations() {
         const panel = document.getElementById("tips-panel");
+        if (!panel) return;
         const txs = state.transactions;
         
         if (txs.length === 0) {
@@ -1138,7 +395,7 @@
                     
                     buffer += decoder.decode(value, { stream: true });
                     const lines = buffer.split("\n");
-                    buffer = lines.pop(); // keep last unfinished line
+                    buffer = lines.pop();
 
                     for (const line of lines) {
                         const trimmed = line.trim();
@@ -1153,14 +410,11 @@
                                     outputBox.innerText = fullText;
                                     outputBox.scrollTop = outputBox.scrollHeight;
                                 }
-                            } catch (e) {
-                                // Ignore non-json or incomplete json lines in stream
-                            }
+                            } catch (e) {}
                         }
                     }
                 }
                 
-                // Final stream cleanup
                 if (buffer && buffer.startsWith("data: ")) {
                     try {
                         const chunk = JSON.parse(buffer.slice(6));
@@ -1173,10 +427,9 @@
                 }
                 
                 const latency = performance.now() - startTime;
-                showMetaInfo(model, fullText, prompt, latency);
+                showSavingsBadge(model, fullText, prompt, latency);
                 
             } else {
-                // Non-streaming response
                 const data = await response.json();
                 const answer = data.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
                 outputBox.innerText = answer;
@@ -1206,24 +459,9 @@
         }
     }
 
-    function showMetaInfo(model, responseText, promptText, latencyMs) {
-        const prompt_tokens = Math.max(1, Math.round(promptText.length / 4));
-        const completion_tokens = Math.max(1, Math.round(responseText.length / 4));
-        const total_tokens = prompt_tokens + completion_tokens;
-        
-        const prices = pricing[model];
-        const cost = ((prompt_tokens * prices.input) + (completion_tokens * prices.output)) / 1_000_000;
-        
-        document.getElementById("meta-tokens").innerText = `In: ${prompt_tokens} / Out: ${completion_tokens} (Total: ~${total_tokens})`;
-        document.getElementById("meta-latency").innerText = `${Math.round(latencyMs)} ms`;
-        document.getElementById("meta-cost").innerText = `$${cost.toFixed(5)}`;
-        
-        showSavingsBadge(model, prompt_tokens, completion_tokens);
-        document.getElementById("meta-container").style.display = "flex";
-    }
-
     function showSavingsBadge(currentModel, prompt_tokens, completion_tokens) {
         const savingSpan = document.getElementById("meta-saving");
+        if (!savingSpan) return;
         savingSpan.innerText = "";
         
         if (currentModel === "mistral:7b") {
@@ -1243,6 +481,4 @@
         }
     }
 </script>
-
-</body>
-</html>
+{% endblock %}

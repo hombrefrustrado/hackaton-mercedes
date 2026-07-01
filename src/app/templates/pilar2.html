@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Panel Izquierdo: Gobernanza y Alertas -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- Configuración de Límites (Gobernanza) -->
+        <div class="glass-card">
+            <div class="card-title">Configuración de Gobernanza y Umbrales</div>
+            <div class="form-group">
+                <label for="config-consumer">Rol / Equipo</label>
+                <select id="config-consumer" onchange="loadConfigForm()">
+                    <option value="marketing">Marketing</option>
+                    <option value="desarrollo">Desarrollo</option>
+                    <option value="RRHH">RRHH</option>
+                </select>
+            </div>
+            <div class="config-grid">
+                <div class="form-group">
+                    <label for="config-limit">Límite Presupuestal ($)</label>
+                    <input type="number" id="config-limit" step="0.5" min="0.1" value="5.0">
+                </div>
+                <div class="form-group">
+                    <label for="config-threshold">Umbral de Alerta (%)</label>
+                    <input type="number" id="config-threshold" step="5" min="10" max="100" value="80">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" style="flex-grow:1;" onclick="saveConfig()">Actualizar Reglas</button>
+                <button class="btn btn-secondary btn-danger" onclick="resetDb()" title="Reiniciar base de datos de transacciones">Reset</button>
+            </div>
+        </div>
+
+        <!-- Alertas FinOps Activas -->
+        <div class="glass-card">
+            <div class="card-title">
+                Alertas Activas
+                <span class="badge" id="alert-count">0</span>
+            </div>
+            <div class="alert-panel" id="alert-panel">
+                <div class="alert-empty">No hay alertas activas en este periodo.</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Panel Derecho: Gráfico de Predicción de Gasto -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <div class="glass-card" style="flex-grow: 1;">
+            <div class="card-title">
+                Proyección y Predicción de Gasto (Próximos 7 días)
+                <span class="badge" style="background:var(--accent-primary-glow); color:#c084fc;">Forecast Inteligente</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                <div class="form-group" style="width: 250px;">
+                    <label for="select-forecast-role">Filtrar Proyección por Rol</label>
+                    <select id="select-forecast-role" onchange="updateForecastChart()">
+                        <option value="todos">Todos los Roles (Consolidado)</option>
+                        <option value="marketing">Marketing (Ana)</option>
+                        <option value="desarrollo">Desarrollo (Carlos)</option>
+                        <option value="rrhh">RRHH (Paco)</option>
+                    </select>
+                </div>
+                <div id="forecast-status-badge" style="margin-top: 1rem;"></div>
+            </div>
+
+            <!-- Canvas para el gráfico de predicción -->
+            <div style="background: rgba(10, 15, 30, 0.5); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color); min-height: 280px; position: relative;">
+                <canvas id="forecastChart" style="max-height: 300px; width: 100%;"></canvas>
+            </div>
+
+            <!-- Análisis Predictivo -->
+            <div class="output-meta" id="forecast-meta" style="flex-direction: column; gap: 0.75rem; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Tasa de Gasto Diario (Burn Rate):</span>
+                    <strong style="color:#fff;" id="p2-burn-rate">$0.00000 / día</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Días estimados hasta agotar presupuesto:</span>
+                    <strong id="p2-days-left" style="color:var(--accent-success);">Seguro (sin riesgo)</strong>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem; margin-top: 0.25rem;">
+                    La predicción analiza el consumo acumulado de hoy extrapolando linealmente la tendencia de consumo para los próximos 7 días laborales.
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let forecastChart = null;
+
+    function initPageSpecific() {
+        setTimeout(loadConfigForm, 500); // Allow state to load first
+    }
+
+    function renderBudgets() {
+        // Not used on this page, but required as callback in base.html refreshState
+    }
+
+    function renderAlerts() {
+        const countBadge = document.getElementById("alert-count");
+        const panel = document.getElementById("alert-panel");
+        if (!panel) return;
+        
+        countBadge.innerText = state.alerts.length;
+        
+        if (state.alerts.length === 0) {
+            panel.innerHTML = `<div class="alert-empty">No hay alertas activas en este periodo.</div>`;
+            return;
+        }
+        
+        panel.innerHTML = state.alerts.map(alert => {
+            const severity = alert.severity || 'warning';
+            return `
+                <div class="alert-item ${severity}">
+                    <span>${severity === 'danger' ? '🚨' : '⚠️'}</span>
+                    <div>
+                        <div style="font-weight:600; font-size:0.85rem; color:var(--text-muted)">${alert.timestamp}</div>
+                        <div>${alert.message}</div>
+                    </div>
+                </div>
+            `;
+        }).reverse().join("");
+    }
+
+    function renderRecommendations() {
+        // Not used on this page
+    }
+
+    function loadConfigForm() {
+        const id = document.getElementById("config-consumer").value;
+        const consumer = state.consumers[id];
+        if (!consumer) return;
+        
+        document.getElementById("config-limit").value = consumer.budget_limit;
+        document.getElementById("config-threshold").value = Math.round(consumer.alert_threshold * 100);
+    }
+
+    async function saveConfig() {
+        const id = document.getElementById("config-consumer").value;
+        const limit = parseFloat(document.getElementById("config-limit").value);
+        const threshold = parseFloat(document.getElementById("config-threshold").value) / 100;
+        
+        try {
+            const res = await fetch("/api/finops/config", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    [id]: {
+                        budget_limit: limit,
+                        alert_threshold: threshold
+                    }
+                })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                state = data.state;
+                renderAlerts();
+                loadConfigForm();
+                updateForecastChart();
+                alert("Gobernanza de presupuesto actualizada.");
+            }
+        } catch (e) {
+            alert("Error al actualizar la configuración: " + e);
+        }
+    }
+
+    async function resetDb() {
+        if (!confirm("¿Estás seguro de que quieres borrar el historial de transacciones y restablecer los gastos?")) return;
+        try {
+            const res = await fetch("/api/finops/reset", { method: "POST" });
+            if (res.ok) {
+                const data = await res.json();
+                state = data.state;
+                renderAlerts();
+                updateForecastChart();
+            }
+        } catch (e) {
+            alert("Error al restablecer la base de datos: " + e);
+        }
+    }
+
+    function updatePilar1Stats() {
+        // Callback automatically executed when state refreshes
+        updateForecastChart();
+    }
+
+    function updateForecastChart() {
+        const selectedRole = document.getElementById("select-forecast-role").value;
+        const txs = state.transactions;
+        
+        let limit = 0;
+        let spent = 0;
+        
+        if (selectedRole === "todos") {
+            // Consolidate spent & limits
+            for (const consumer of Object.values(state.consumers)) {
+                limit += consumer.budget_limit;
+                spent += consumer.spent;
+            }
+        } else {
+            const consumer = state.consumers[selectedRole];
+            if (consumer) {
+                limit = consumer.budget_limit;
+                spent = consumer.spent;
+            }
+        }
+        
+        // Compute Daily Burn Rate based on today's consumption
+        // (if they spent $X today, we assume daily spent is $X for baseline projection)
+        const dailyBurnRate = spent;
+        
+        document.getElementById("p2-burn-rate").innerText = `$${dailyBurnRate.toFixed(5)} / día`;
+        
+        // Extrapolate next 7 days
+        const labels = ["Hoy (Histórico)"];
+        const historyData = [spent];
+        const forecastData = [spent];
+        const limitData = [limit];
+        
+        const today = new Date();
+        for (let i = 1; i <= 7; i++) {
+            const nextDate = new Date(today);
+            nextDate.setDate(today.getDate() + i);
+            const dateStr = nextDate.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+            labels.push(dateStr);
+            
+            const projectedSpent = spent + (i * dailyBurnRate);
+            forecastData.push(projectedSpent);
+            historyData.push(null); // No history for future days
+            limitData.push(limit);
+        }
+        
+        // Calculate exhaustion day
+        const daysLeftBadge = document.getElementById("p2-days-left");
+        const statusBadge = document.getElementById("forecast-status-badge");
+        
+        if (dailyBurnRate <= 0) {
+            daysLeftBadge.innerText = "Estable (Sin consumo)";
+            daysLeftBadge.style.color = "var(--accent-success)";
+            statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3)">Estable</span>`;
+        } else {
+            const daysLeft = (limit - spent) / dailyBurnRate;
+            if (daysLeft < 0) {
+                daysLeftBadge.innerText = "Presupuesto ya Excedido";
+                daysLeftBadge.style.color = "var(--accent-danger)";
+                statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3)">¡Presupuesto Agotado!</span>`;
+            } else if (daysLeft <= 7) {
+                daysLeftBadge.innerText = `¡Alerta! Exceso previsto en ${daysLeft.toFixed(1)} días`;
+                daysLeftBadge.style.color = "var(--accent-danger)";
+                statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3)">Riesgo Alto</span>`;
+            } else if (daysLeft <= 14) {
+                daysLeftBadge.innerText = `Moderado (Superará en ${daysLeft.toFixed(1)} días)`;
+                daysLeftBadge.style.color = "var(--accent-warning)";
+                statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3)">Riesgo Medio</span>`;
+            } else {
+                daysLeftBadge.innerText = `Seguro (>15 días restantes)`;
+                daysLeftBadge.style.color = "var(--accent-success)";
+                statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3)">Seguro</span>`;
+            }
+        }
+        
+        // Draw/Update Chart
+        const ctx = document.getElementById("forecastChart").getContext("2d");
+        
+        if (forecastChart) {
+            forecastChart.destroy();
+        }
+        
+        forecastChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "Histórico Acumulado",
+                        data: historyData,
+                        borderColor: "rgba(139, 92, 246, 1)",
+                        backgroundColor: "rgba(139, 92, 246, 0.1)",
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointBackgroundColor: "rgba(139, 92, 246, 1)",
+                        fill: true
+                    },
+                    {
+                        label: "Proyección Predictiva",
+                        data: forecastData,
+                        borderColor: "rgba(167, 139, 250, 0.8)",
+                        borderDash: [6, 4],
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        pointBackgroundColor: "rgba(167, 139, 250, 1)",
+                        fill: false
+                    },
+                    {
+                        label: "Límite de Presupuesto",
+                        data: limitData,
+                        borderColor: "rgba(239, 68, 68, 0.8)",
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false,
+                        borderDash: [3, 3]
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: "#9ca3af",
+                            font: { family: "'Outfit', sans-serif" }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: "rgba(255, 255, 255, 0.05)" },
+                        ticks: { color: "#9ca3af" }
+                    },
+                    y: {
+                        grid: { color: "rgba(255, 255, 255, 0.05)" },
+                        ticks: { 
+                            color: "#9ca3af",
+                            callback: function(value) { return "$" + value.toFixed(4); }
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
