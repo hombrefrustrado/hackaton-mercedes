@@ -2,44 +2,63 @@
 
 {% block content %}
 <div class="dashboard-grid" style="grid-template-columns: 1.2fr 0.8fr; gap: 2rem;">
-    
+
     <!-- Panel Principal: Enrutador KNN y Métricas -->
     <div style="display: flex; flex-direction: column; gap: 2rem;">
-        
+
         <div class="glass-card">
             <div class="card-title">
                 Pilar 3: Enrutamiento Inteligente (AI Router)
                 <span class="badge" style="background:var(--accent-primary-glow); color:#c084fc;">K-NN Activo</span>
             </div>
-            
-            <div style="display: flex; flex-direction: column; gap: 1rem; color: var(--text-secondary); line-height: 1.6;">
-                <p>El gateway de control de costes incluye un sistema de enrutamiento inteligente dinámico que intercepta las peticiones enviadas al endpoint <code>/api/v1/auto</code> y selecciona el modelo de IA más apropiado.</p>
-                
-                <div style="background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.15); padding: 1.25rem; border-radius: 8px; color: #fff;">
-                    <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; color: #c084fc; display: flex; align-items: center; gap: 0.5rem;">
+
+            <div
+                style="display: flex; flex-direction: column; gap: 1rem; color: var(--text-secondary); line-height: 1.6;">
+                <p>El gateway de control de costes incluye un sistema de enrutamiento inteligente dinámico que
+                    intercepta las peticiones enviadas al endpoint <code>/api/v1/auto</code> y selecciona el modelo de
+                    IA más apropiado.</p>
+
+                <div
+                    style="background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.15); padding: 1.25rem; border-radius: 8px; color: #fff;">
+                    <div
+                        style="font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; color: #c084fc; display: flex; align-items: center; gap: 0.5rem;">
                         <span>🧠</span> Modelo KNN Implementado (modelo_knn_ej8.joblib)
                     </div>
                     <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
-                        Hemos integrado exitosamente el clasificador entrenado por el equipo de ciencia de datos. El proxy de Flask procesa en tiempo real las solicitudes entrantes utilizando la siguiente configuración técnica:
+                        Hemos integrado exitosamente el clasificador entrenado por el equipo de ciencia de datos. El
+                        proxy de Flask procesa en tiempo real las solicitudes entrantes utilizando la siguiente
+                        configuración técnica:
                     </p>
-                    <ul style="font-size: 0.88rem; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; color: var(--text-primary);">
-                        <li><strong>Algoritmo:</strong> <code>KNeighborsClassifier(n_neighbors=3, metric='precomputed')</code></li>
-                        <li><strong>Métrica de Distancia:</strong> <code>Distancia de Gower</code> (calculada dinámicamente sobre variables categóricas y numéricas).</li>
+                    <ul
+                        style="font-size: 0.88rem; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; color: var(--text-primary);">
+                        <li><strong>Algoritmo:</strong>
+                            <code>KNeighborsClassifier(n_neighbors=3, metric='precomputed')</code>
+                        </li>
+                        <li><strong>Métrica de Distancia:</strong> <code>Distancia de Gower</code> (calculada
+                            dinámicamente sobre variables categóricas y numéricas).</li>
                         <li><strong>Variables Predictoras (Features):</strong>
                             <ul style="padding-left: 1rem; margin-top: 0.25rem; color: var(--text-secondary);">
-                                <li><code>departamento</code> (Rol/Equipo del usuario: marketing, desarrollo, rrhh).</li>
+                                <li><code>departamento</code> (Rol/Equipo del usuario: marketing, desarrollo, rrhh).
+                                </li>
                                 <li><code>prompt_tokens</code> (Estimado del tamaño de entrada).</li>
-                                <li><code>latency_s</code>, <code>completion_tokens</code>, <code>total_tokens</code>, <code>cost</code> (Imputados con las medianas de entrenamiento).</li>
+                                <li><code>latency_s</code>, <code>completion_tokens</code>, <code>total_tokens</code>,
+                                    <code>cost</code> (Imputados con las medianas de entrenamiento).
+                                </li>
                             </ul>
                         </li>
-                        <li><strong>Resolución Destino:</strong> Enruta de forma fluida a <code>llama3.2:3b</code>, <code>mistral:7b</code>, o <code>llama-3.1-8b-instant</code>.</li>
+                        <li><strong>Resolución Destino:</strong> Enruta de forma fluida a <code>llama3.2:3b</code>,
+                            <code>mistral:7b</code>, o <code>llama-3.1-8b-instant</code>.
+                        </li>
                     </ul>
                 </div>
 
                 <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
-                    <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem;">Próximos Pasos (Espacio para el Equipo)</h3>
+                    <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem;">Próximos Pasos (Espacio para el
+                        Equipo)</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted);">
-                        El equipo de desarrollo puede completar este módulo implementando las reglas de negocio FinOps avanzadas, simulaciones de fallos cruzados (failover) y análisis de ahorro obtenido frente al modelo más caro por defecto.
+                        El equipo de desarrollo puede completar este módulo implementando las reglas de negocio FinOps
+                        avanzadas, simulaciones de fallos cruzados (failover) y análisis de ahorro obtenido frente al
+                        modelo más caro por defecto.
                     </p>
                 </div>
             </div>
@@ -48,7 +67,8 @@
         <!-- Tarjeta de Reglas de Enrutamiento y Negocio -->
         <div class="glass-card">
             <div class="card-title">Reglas de Negocio FinOps (Placeholder)</div>
-            <div style="font-size: 0.9rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.75rem;">
+            <div
+                style="font-size: 0.9rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.75rem;">
                 <p>Configura las reglas para balancear el coste y la latencia según necesidades operativas:</p>
                 <div style="opacity: 0.5; pointer-events: none;">
                     <div class="form-group">
@@ -61,7 +81,8 @@
                     </div>
                     <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
                         <label class="toggle-container">
-                            <span class="switch"><input type="checkbox" checked disabled><span class="slider"></span></span>
+                            <span class="switch"><input type="checkbox" checked disabled><span
+                                    class="slider"></span></span>
                             <span>Forzar enrutamiento local si la nube excede $0.05/llamada</span>
                         </label>
                     </div>
@@ -73,20 +94,152 @@
             </div>
         </div>
 
+        <!-- Tarjeta de Análisis NLP y Sentimiento -->
+        <div class="glass-card">
+            <div class="card-title">
+                Análisis de Lenguaje Natural y Sentimiento
+                <span class="badge" style="background: rgba(59,130,246,0.15); color:#60a5fa;">NLP Heurístico</span>
+            </div>
+            <div
+                style="font-size: 0.9rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.75rem;">
+                <p>Cada prompt pasa por un análisis lingüístico basado en <strong>listas de palabras clave
+                        ponderadas</strong> para inferir la intención y el tono antes de enrutar la petición. Este
+                    análisis opera en cuatro dimensiones independientes:</p>
+
+                <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+
+                    <div
+                        style="border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; padding: 0.75rem; background: rgba(239,68,68,0.04);">
+                        <div style="font-weight: 700; color: #f87171; margin-bottom: 0.35rem; font-size: 0.88rem;">🚨
+                            Criticidad — Análisis de Urgencia</div>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">Detecta señales de alto
+                            impacto y urgencia temporal mediante términos como <code>urgente</code>,
+                            <code>crítico</code>, <code>producción</code>, <code>vulnerabilidad</code>,
+                            <code>incidente</code>, <code>brecha de seguridad</code>. Cada término suma al score de
+                            forma ponderada (doble peso para los más graves). Score resultante: 0–10.
+                        </p>
+                    </div>
+
+                    <div
+                        style="border: 1px solid rgba(139,92,246,0.25); border-radius: 8px; padding: 0.75rem; background: rgba(139,92,246,0.04);">
+                        <div style="font-weight: 700; color: #c084fc; margin-bottom: 0.35rem; font-size: 0.88rem;">🔬
+                            Especificación — Complejidad Técnica</div>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">Evalúa la densidad de
+                            terminología técnica y de dominio: <code>código</code>, <code>sql</code>,
+                            <code>docker</code>, <code>kubernetes</code>, <code>api</code>, <code>arquitectura</code>,
+                            <code>configurar</code>, <code>depurar</code>. Solicitudes con alta especificación requieren
+                            un modelo con mayor capacidad de razonamiento.
+                        </p>
+                    </div>
+
+                    <div
+                        style="border: 1px solid rgba(234,179,8,0.25); border-radius: 8px; padding: 0.75rem; background: rgba(234,179,8,0.04);">
+                        <div style="font-weight: 700; color: #facc15; margin-bottom: 0.35rem; font-size: 0.88rem;">📋
+                            Concretitud — Instrucciones Estructuradas</div>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">Identifica si el usuario
+                            quiere una respuesta step-by-step mediante marcadores como <code>paso a paso</code>,
+                            <code>exactamente</code>, <code>detalla</code>, <code>instrucciones precisas</code>,
+                            <code>lista numerada</code>. Implica estructurar bien la respuesta, priorizando modelos más
+                            instructivos.
+                        </p>
+                    </div>
+
+                    <div
+                        style="border: 1px solid rgba(16,185,129,0.25); border-radius: 8px; padding: 0.75rem; background: rgba(16,185,129,0.04);">
+                        <div style="font-weight: 700; color: #34d399; margin-bottom: 0.35rem; font-size: 0.88rem;">📏
+                            Tamaño de Respuesta — Inferencia de Longitud</div>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">Estima si la respuesta
+                            esperada es larga (<code>informe completo</code>, <code>guion de 8 minutos</code>,
+                            <code>1000 palabras</code>, <code>exhaustivo</code>) o corta (<code>brevemente</code>,
+                            <code>en una frase</code>, <code>resumen</code>). Determina qué modelo optimiza mejor el
+                            coste por token.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta de Métricas de Rendimiento y Composite Score -->
+        <div class="glass-card">
+            <div class="card-title">
+                Métricas de Rendimiento Exhaustivas
+                <span class="badge" style="background: rgba(16,185,129,0.15); color:#34d399;">Composite Score</span>
+            </div>
+            <div
+                style="font-size: 0.9rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.75rem;">
+                <p>Para cada query del conjunto base de 60, ejecutamos los <strong>3 modelos en
+                        paralelo</strong> y recopilamos un conjunto
+                    exhaustivo (180 resultados) de métricas reales de ejecución. Con ellas construímos un score
+                    comparativo normalizado
+                    entre las tres versiones competidoras. El resultado son los 60 datos clasificados con un alto grado
+                    de confianza.
+                    Hemos realizado este análisis más costoso al conjunto inicial que son el <strong>cimiento</strong>
+                    a partir de la cual K-NN clasifica.
+                </p>
+
+                <div class="table-wrapper" style="font-size: 0.8rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Métrica</th>
+                                <th>Cómo se mide</th>
+                                <th>Peso proporcional</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Idoneidad (Fit)</strong></td>
+                                <td>Score NLP normalizado entre los 3 modelos para esa query</td>
+                                <td><span style="color:#c084fc;">≈ 58%</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Latencia (s)</strong></td>
+                                <td>Tiempo real medido desde la petición hasta el primer token</td>
+                                <td><span style="color:#60a5fa;">≈ 12%</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Coste ($)</strong></td>
+                                <td>Tokens consumidos × tarifa del proveedor (prompt + completion)</td>
+                                <td><span style="color:#34d399;">≈ 30%</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div
+                    style="border-top: 1px solid var(--border-color); padding-top: 0.75rem; font-size: 0.82rem; color: var(--text-muted);">
+                    <p style="margin-bottom: 0.4rem;"><strong style="color: var(--text-primary);">Normalización relativa
+                            por query:</strong> Los scores de latencia y coste no son absolutos; se calculan comparando
+                        los 3 modelos <em>entre sí para esa misma query</em>. El más rápido recibe 10/10, el más lento
+                        0/10. Esto garantiza que siempre gane el mejor modelo disponible, no el "menos malo".</p>
+                    <p><strong style="color: var(--text-primary);">Pesos dinámicos:</strong> Los porcentajes anteriores
+                        varían en función del análisis NLP. Si se detecta alta criticidad, el peso del fit sube hasta el
+                        65% y el del coste baja al 5%. Para respuestas largas, el coste sube al 50%. El sistema prioriza
+                        lo que más importa para cada tipo de tarea.</p>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Panel Lateral: Estados de Failover y Redirección -->
     <div style="display: flex; flex-direction: column; gap: 2rem;">
-        
+
         <!-- Tolerancia a Fallos (High Availability) -->
         <div class="glass-card">
             <div class="card-title">Manejo de Fallos (Redirección Automática)</div>
-            <div style="font-size: 0.9rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.75rem;">
-                <p>El gateway monitoriza la salud de los proveedores. Si el modelo clasificado por el KNN se encuentra caído o inaccesible, el tráfico se redirigirá automáticamente a un nodo secundario de respaldo.</p>
-                
-                <div style="border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem; background: rgba(0,0,0,0.2);">
-                    <div style="font-weight: 600; color: #fff; margin-bottom: 0.5rem; font-size: 0.85rem;">Esquema de Respaldo:</div>
-                    <div style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; font-family: monospace;">
+            <div
+                style="font-size: 0.9rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.75rem;">
+                <p>El gateway monitoriza la salud de los proveedores. Si el modelo clasificado por el KNN se encuentra
+                    caído o inaccesible, el tráfico se redirigirá automáticamente a un nodo secundario de respaldo.</p>
+
+                <div
+                    style="border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem; background: rgba(0,0,0,0.2);">
+                    <div style="font-weight: 600; color: #fff; margin-bottom: 0.5rem; font-size: 0.85rem;">Esquema de
+                        Respaldo:</div>
+                    <div
+                        style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; font-family: monospace;">
                         <div style="display: flex; justify-content: space-between;">
                             <span style="color:var(--accent-warning);">Llama 3.2 (Caído)</span>
                             <span style="color:var(--text-muted);">➔</span>
@@ -99,10 +252,11 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="alert-item info" style="margin-top: 0.5rem;">
                     <span>ℹ️</span>
-                    <div>El sistema actual realiza la redirección simulada si los contenedores locales de Ollama no responden.</div>
+                    <div>El sistema actual realiza la redirección simulada si los contenedores locales de Ollama no
+                        responden.</div>
                 </div>
             </div>
         </div>
