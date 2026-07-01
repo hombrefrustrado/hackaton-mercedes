@@ -13,3 +13,7 @@ def pilar1():
 @web_bp.route("/pilar2")
 def pilar2():
     return render_template("pilar2.html")
+
+@web_bp.route("/pilar3")
+def pilar3():
+    return render_template("pilar3.html")

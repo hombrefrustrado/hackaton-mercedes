@@ -11,7 +11,9 @@ logger = logging.getLogger("finops_proxy.proxy")
 def resolve_model(model_name: str) -> Optional[str]:
     """Resolves standard and normalized model names to actual names."""
     m = model_name.lower().strip()
-    if m in ["llama3.2:3b", "llama3.2-3b", "llama3.2", "provider-a", "llama", "auto"]:
+    if m == "auto":
+        return "auto"
+    elif m in ["llama3.2:3b", "llama3.2-3b", "llama3.2", "provider-a", "llama"]:
         return "llama3.2:3b"
     elif m in ["mistral:7b", "mistral-7b", "mistral", "provider-b"]:
         return "mistral:7b"
