@@ -105,7 +105,12 @@ def handle_proxy(model_name):
     # Run KNN classifier if auto-routing is requested
     if resolved == "auto":
         from ..utils.knn_routing import predict_knn_model
-        from ....testing.analyzer_simple import analyze_query
+        import sys
+        import os
+        workspace_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+        if workspace_root not in sys.path:
+            sys.path.insert(0, workspace_root)
+        from testing.analyzer_simple import analyze_query
 
         prompt = ""
         for msg in body.get("messages", []):
@@ -114,8 +119,15 @@ def handle_proxy(model_name):
         
         query_scores = analyze_query(prompt)
 
-        # Predict using KNN classifier
-        resolved = predict_knn_model(role_name.lower(), prompt_tokens, query_scores['concretitud'], query_scores['especificacion'], query_scores['criticidad'])
+        # Predict using KNN classifier, passing all dimensions including tamano_respuesta
+        resolved = predict_knn_model(
+            role_name.lower(), 
+            prompt_tokens, 
+            query_scores.get('concretitud', 0.0), 
+            query_scores.get('especificacion', 0.0), 
+            query_scores.get('criticidad', 0.0),
+            query_scores.get('tamano_respuesta', 0.0)
+        )
         logger.info(f"KNN Classifier selected model '{resolved}' for role '{role_name}', {prompt_tokens} prompt tokens and {query_scores} query scores.")
 
     body["model"] = resolved
