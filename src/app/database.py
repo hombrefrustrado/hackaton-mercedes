@@ -92,7 +92,7 @@ def init_db():
         default_roles = [
             (1, "marketing", 5.0),   # Presupuesto asignado (ej. equivalente a $5.0)
             (2, "desarrollo", 10.0),   # Presupuesto asignado (ej. equivalente a $10.0)
-            (3, "RH", 2.0)      # Presupuesto asignado (ej. equivalente a $2.0)
+            (3, "RRHH", 2.0)      # Presupuesto asignado (ej. equivalente a $2.0)
         ]
         cursor.executemany("INSERT INTO Rol VALUES (?, ?, ?)", default_roles)
         
