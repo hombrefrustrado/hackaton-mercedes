@@ -1,0 +1,63 @@
+version: '3'
+
+dotenv: ['.env']
+
+tasks:
+  start:
+    desc: "start local AI providers (Provider A: port 11434, Provider B: port 11435)"
+    cmds:
+      - docker compose -f docker-compose.yml up -d
+      - echo "Waiting for Provider A to be ready..."
+      - until curl -sf http://localhost:11434/api/tags > /dev/null; do sleep 2; done
+      - echo "Waiting for Provider B to be ready..."
+      - until curl -sf http://localhost:11435/api/tags > /dev/null; do sleep 2; done
+      - echo "Waiting for ai-finops-proxy to be ready..."
+      - until curl -sf http://localhost:8000/v1/models > /dev/null; do sleep 2; done
+      - |
+        echo ""
+        echo "All services are up:"
+        echo "  Provider A llama3.2:3b  -> http://localhost:11434  OpenAI-compatible: http://localhost:11434/v1"
+        echo "  Provider B mistral:7b   -> http://localhost:11435  OpenAI-compatible: http://localhost:11435/v1"
+        echo "  AI FinOps Proxy        -> http://localhost:8000"
+
+  pull:
+    desc: "pull AI models into both providers (run once after start)"
+    cmds:
+      - echo "Pulling llama3.2:3b into Provider A..."
+      - docker exec ollama-provider-a ollama pull llama3.2:3b
+      - echo "Pulling mistral:7b into Provider B (this may take a few minutes)..."
+      - docker exec ollama-provider-b ollama pull mistral:7b
+      - echo "Models ready."
+
+  smoke:
+    desc: "smoke test all providers with a single chat completion each"
+    cmds:
+      - echo "--- Provider A llama3.2:3b (local) ---"
+      - |
+        curl -sf http://localhost:11434/v1/chat/completions \
+          -H "Content-Type: application/json" \
+          -d '{"model":"llama3.2:3b","messages":[{"role":"user","content":"Reply with OK only"}],"max_tokens":5}' \
+          | jq '{model: .model, reply: .choices[0].message.content, usage: .usage}'
+      - echo "--- Provider B mistral:7b (local) ---"
+      - |
+        curl -sf http://localhost:11435/v1/chat/completions \
+          -H "Content-Type: application/json" \
+          -d '{"model":"mistral:7b","messages":[{"role":"user","content":"Reply with OK only"}],"max_tokens":5}' \
+          | jq '{model: .model, reply: .choices[0].message.content, usage: .usage}'
+      - echo "--- Provider C llama-3.1-8b-instant (Groq cloud) ---"
+      - |
+        curl -sf --ssl-no-revoke https://api.groq.com/openai/v1/chat/completions \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer {{.GROQ_API_KEY}}" \
+          -d '{"model":"llama-3.1-8b-instant","messages":[{"role":"user","content":"Reply with OK only"}],"max_tokens":5}' \
+          | jq '{model: .model, reply: .choices[0].message.content, usage: .usage}'
+
+  stop:
+    desc: "stop and remove both local AI provider containers"
+    cmds:
+      - docker compose -f docker-compose.yml down
+
+  reset:
+    desc: "stop providers and remove all downloaded model data (frees disk space)"
+    cmds:
+      - docker compose -f docker-compose.yml down -v

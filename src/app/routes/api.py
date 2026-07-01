@@ -107,23 +107,13 @@ def handle_proxy(model_name):
     is_stream = body.get("stream", False)
     start_time = time.time()
 
-    # 3. Connection health test to auto-detect if live mode is possible
-    # We query the Ollama base port (without /v1) which returns 'Ollama is running' immediately
-    is_live = False
-    try:
-        if resolved == "llama-3.1-8b-instant" and not GROQ_API_KEY:
-            raise Exception("Groq key not configured")
-            
-        ping_url = PROVIDER_A_URL.replace("/v1", "") if resolved == "llama3.2:3b" else (PROVIDER_B_URL.replace("/v1", "") if resolved == "mistral:7b" else PROVIDER_C_URL)
-        ping_headers = {"Authorization": f"Bearer {GROQ_API_KEY}"} if (resolved == "llama-3.1-8b-instant" and GROQ_API_KEY) else {}
-        
-        with httpx.Client(timeout=3.0) as client:
-            client.get(ping_url, headers=ping_headers)
-        is_live = True
-    except Exception as e:
-        logger.info(f"Ollama/Groq container offline or API error: {e}. Falling back to simulation.")
+    # 3. Use live mode for local models always, fallback to mock only for Groq if key is missing
+    is_live = True
+    if resolved == "llama-3.1-8b-instant" and not GROQ_API_KEY:
+        is_live = False
+        logger.info("Groq key not configured. Falling back to simulation.")
 
-    # 4. Fallback Mock mode if live container is unreachable
+    # 4. Fallback Mock mode
     if not is_live:
         if is_stream:
             return Response(handle_mock_stream(resolved, body, user_id, start_time), mimetype="text/event-stream")

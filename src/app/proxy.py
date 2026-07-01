@@ -221,11 +221,13 @@ def handle_live_stream(target_url: str, headers: dict, body: dict, consumer_id: 
         with httpx.Client(timeout=60.0) as client:
             with client.stream("POST", target_url, headers=headers, json=body) as response:
                 if response.status_code != 200:
-                    yield response.read()
+                    error_content = response.read().decode("utf-8")
+                    yield f"data: {json.dumps({'error': error_content})}\n\n"
                     return
                     
                 for line in response.iter_lines():
                     if not line:
+                        yield "\n"
                         continue
                     yield line + "\n"
                     
