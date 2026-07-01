@@ -211,11 +211,27 @@ def get_state():
                     "severity": "warning"
                 })
         
+    # 4. Recuperar todos los usuarios y sus roles para el selector del front
+    cursor.execute("""
+        SELECT u.Email as email, u.nombre as name, r.nombre as role_name, r.presupuesto_tokens as budget_limit
+        FROM Usuario u
+        JOIN Rol r ON u.rol = r.Id
+    """)
+    users_list = []
+    for u in cursor.fetchall():
+        users_list.append({
+            "email": u["email"],
+            "name": u["name"],
+            "role_name": u["role_name"],
+            "budget_limit": float(u["budget_limit"]) if u["budget_limit"] is not None else 0.0
+        })
+        
     conn.close()
     return {
         "consumers": consumers,
         "transactions": transactions,
-        "alerts": alerts
+        "alerts": alerts,
+        "users": users_list
     }
 
 def update_consumer_config(data: dict):

@@ -287,7 +287,7 @@
         }
         
         // Update Metadata info
-        document.getElementById("p2-burn-rate").innerText = `$${spent.toFixed(5)}`;
+        document.getElementById("p2-burn-rate").innerText = formatCost(spent);
         
         // Calculate days left using the forecast data trend
         const daysLeftBadge = document.getElementById("p2-days-left");
@@ -377,6 +377,15 @@
                             color: "#9ca3af",
                             font: { family: "'Outfit', sans-serif" }
                         }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const val = context.raw;
+                                if (val === null || val === undefined) return "";
+                                return `${context.dataset.label}: ${formatCost(val)}`;
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -388,7 +397,7 @@
                         grid: { color: "rgba(255, 255, 255, 0.05)" },
                         ticks: { 
                             color: "#9ca3af",
-                            callback: function(value) { return "$" + value.toFixed(5); }
+                            callback: function(value) { return formatCost(value); }
                         }
                     }
                 }
@@ -423,7 +432,7 @@
         deptChart = new Chart(ctx, {
             type: "doughnut",
             data: {
-                labels: ["Marketing (Ana)", "Desarrollo (Carlos)", "RRHH (Paco)"],
+                labels: ["Marketing", "Desarrollo", "RRHH"],
                 datasets: [{
                     data: [mktSpent, devSpent, rrhhSpent],
                     backgroundColor: [
@@ -455,7 +464,7 @@
                             label: function(context) {
                                 const val = context.raw;
                                 const pct = (val / total * 100).toFixed(1);
-                                return `${context.label}: $${val.toFixed(5)} (${pct}%)`;
+                                return `${context.label}: ${formatCost(val)} (${pct}%)`;
                             }
                         }
                     }

@@ -173,7 +173,7 @@
             }
         });
         
-        document.getElementById("p1-total-cost").innerText = `$${totalCost.toFixed(5)}`;
+        document.getElementById("p1-total-cost").innerText = formatCost(totalCost);
         document.getElementById("p1-total-requests").innerText = totalRequests;
         document.getElementById("p1-total-tokens").innerText = `In: ${totalPromptTokens.toLocaleString()} / Out: ${totalCompletionTokens.toLocaleString()}`;
         
@@ -187,8 +187,8 @@
                         <td><strong>${data.name}</strong></td>
                         <td>${data.count}</td>
                         <td>In: ${data.prompt.toLocaleString()} / Out: ${data.completion.toLocaleString()}</td>
-                        <td class="tx-cost">$${data.cost.toFixed(5)}</td>
-                        <td>$${avgCost.toFixed(5)}</td>
+                        <td class="tx-cost">${formatCost(data.cost)}</td>
+                        <td>${formatCost(avgCost)}</td>
                     </tr>
                 `;
             }).join("");
@@ -209,7 +209,7 @@
                         <td><span class="tx-badge ${badgeClass}">${model}</span></td>
                         <td>${data.count}</td>
                         <td>In: ${data.prompt.toLocaleString()} / Out: ${data.completion.toLocaleString()}</td>
-                        <td class="tx-cost">$${data.cost.toFixed(5)}</td>
+                        <td class="tx-cost">${formatCost(data.cost)}</td>
                     </tr>
                 `;
             }).join("");
