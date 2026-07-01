@@ -1,5 +1,2 @@
-# Framework web para el proxy y la interfaz
-Flask>=3.0.0
-
-# Cliente HTTP asíncrono/síncrono para las redirecciones a Ollama y Groq
-httpx>=0.20.0
+Flask
+httpx
