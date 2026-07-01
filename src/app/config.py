@@ -13,5 +13,5 @@ PRICING = {
     "llama-3.1-8b-instant": {"input": 0.05, "output": 0.08}
 }
 
-# DB File path (stored inside src/app/)
-DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "finops_db.json")
+# SQLite DB File path (stored inside src/app/)
+DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "finops_db.sqlite")

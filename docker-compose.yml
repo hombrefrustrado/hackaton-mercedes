@@ -38,23 +38,9 @@ services:
       retries: 10
       start_period: 30s
 
-  # Oracle Database Free Edition
-  oracle-db:
-    image: gvenzl/oracle-free:latest
-    container_name: oracle-db
-    ports:
-      - "1521:1521"
-    environment:
-      - ORACLE_PASSWORD=oracle_db_password
-    volumes:
-      - oracle_data:/opt/oracle/oradata
-    networks:
-      - ai_finops_network
-
 volumes:
   ollama_provider_a:
   ollama_provider_b:
-  oracle_data:
 
 networks:
   ai_finops_network:
