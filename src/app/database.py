@@ -15,9 +15,9 @@ def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Create tables
+    # 1. Create Roles Table (Cost Centers with budget limits)
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS consumers (
+    CREATE TABLE IF NOT EXISTS roles (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         spent REAL DEFAULT 0.0,
@@ -27,54 +27,77 @@ def init_db():
     )
     """)
     
+    # 2. Create Users Table (Linked to a Role)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        role_id TEXT NOT NULL,
+        FOREIGN KEY (role_id) REFERENCES roles (id)
+    )
+    """)
+    
+    # 3. Create Transactions Table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS transactions (
         id TEXT PRIMARY KEY,
         timestamp TEXT NOT NULL,
-        consumer_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
         model TEXT NOT NULL,
         prompt_tokens INTEGER NOT NULL,
         completion_tokens INTEGER NOT NULL,
         cost REAL NOT NULL,
         latency_ms INTEGER NOT NULL,
         stream INTEGER NOT NULL,
-        FOREIGN KEY (consumer_id) REFERENCES consumers (id)
+        FOREIGN KEY (user_id) REFERENCES users (id)
     )
     """)
     
+    # 4. Create Alerts Table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS alerts (
         id TEXT PRIMARY KEY,
         timestamp TEXT NOT NULL,
-        consumer_id TEXT NOT NULL,
+        role_id TEXT NOT NULL,
         message TEXT NOT NULL,
-        severity TEXT NOT NULL
+        severity TEXT NOT NULL,
+        FOREIGN KEY (role_id) REFERENCES roles (id)
     )
     """)
     
-    # Seed default consumers if table is empty
-    cursor.execute("SELECT COUNT(*) FROM consumers")
+    # Seed default roles if empty
+    cursor.execute("SELECT COUNT(*) FROM roles")
     if cursor.fetchone()[0] == 0:
-        default_consumers = [
-            ("equipo-marketing", "Equipo Marketing", 0.0, 5.0, 0.8, 0),
-            ("equipo-producto", "Equipo Producto", 0.0, 10.0, 0.8, 0),
-            ("default-consumer", "Consumidor por Defecto", 0.0, 2.0, 0.8, 0)
+        default_roles = [
+            ("marketing", "Marketing", 0.0, 5.0, 0.8, 0),
+            ("producto", "Producto", 0.0, 10.0, 0.8, 0),
+            ("general", "General", 0.0, 2.0, 0.8, 0)
         ]
-        cursor.executemany("INSERT INTO consumers VALUES (?, ?, ?, ?, ?, ?)", default_consumers)
+        cursor.executemany("INSERT INTO roles VALUES (?, ?, ?, ?, ?, ?)", default_roles)
+        
+    # Seed default users linked to roles if empty
+    cursor.execute("SELECT COUNT(*) FROM users")
+    if cursor.fetchone()[0] == 0:
+        default_users = [
+            ("ana", "Ana", "marketing"),
+            ("carlos", "Carlos", "producto"),
+            ("default", "Usuario Genérico", "general")
+        ]
+        cursor.executemany("INSERT INTO users VALUES (?, ?, ?)", default_users)
         
     conn.commit()
     conn.close()
-    logger.info("SQLite database initialized successfully.")
+    logger.info("SQLite database initialized with separate Roles and Users tables.")
 
-# Initialize SQLite database on module load
+# Initialize database on module load
 init_db()
 
 def get_state():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Retrieve consumers
-    cursor.execute("SELECT * FROM consumers")
+    # Retrieve roles (for budget limits dashboard display)
+    cursor.execute("SELECT * FROM roles")
     consumers = {}
     for r in cursor.fetchall():
         consumers[r["id"]] = {
@@ -85,15 +108,21 @@ def get_state():
             "alert_fired": bool(r["alert_fired"])
         }
         
-    # Retrieve transactions
-    cursor.execute("SELECT * FROM transactions ORDER BY timestamp ASC")
+    # Retrieve transactions with user & role joining
+    cursor.execute("""
+        SELECT t.*, u.name as user_name, r.name as role_name 
+        FROM transactions t
+        JOIN users u ON t.user_id = u.id
+        JOIN roles r ON u.role_id = r.id
+        ORDER BY t.timestamp ASC
+    """)
     transactions = []
     for r in cursor.fetchall():
         transactions.append({
             "id": r["id"],
             "timestamp": r["timestamp"],
-            "consumer_id": r["consumer_id"],
-            "consumer_name": consumers.get(r["consumer_id"], {}).get("name", r["consumer_id"]),
+            "consumer_id": r["user_id"],
+            "consumer_name": f"{r['user_name']} ({r['role_name']})",
             "model": r["model"],
             "prompt_tokens": r["prompt_tokens"],
             "completion_tokens": r["completion_tokens"],
@@ -109,15 +138,15 @@ def get_state():
         alerts.append({
             "id": r["id"],
             "timestamp": r["timestamp"],
-            "consumer_id": r["consumer_id"],
-            "consumer_name": consumers.get(r["consumer_id"], {}).get("name", r["consumer_id"]),
+            "consumer_id": r["role_id"],
+            "consumer_name": r["role_id"].title(),
             "message": r["message"],
             "severity": r["severity"]
         })
         
     conn.close()
     return {
-        "consumers": consumers,
+        "consumers": consumers, # Mapped to roles for backward compatibility with UI
         "transactions": transactions,
         "alerts": alerts
     }
@@ -125,28 +154,19 @@ def get_state():
 def update_consumer_config(data: dict):
     conn = get_db_connection()
     cursor = conn.cursor()
-    for consumer_id, config in data.items():
-        # Check if consumer exists, if not create
-        cursor.execute("SELECT COUNT(*) FROM consumers WHERE id = ?", (consumer_id,))
-        exists = cursor.fetchone()[0] > 0
-        if not exists:
-            cursor.execute(
-                "INSERT INTO consumers (id, name, spent, budget_limit, alert_threshold, alert_fired) VALUES (?, ?, 0.0, 5.0, 0.8, 0)",
-                (consumer_id, consumer_id.replace("-", " ").title())
-            )
-            
+    for role_id, config in data.items():
         if "budget_limit" in config:
-            cursor.execute("UPDATE consumers SET budget_limit = ? WHERE id = ?", (float(config["budget_limit"]), consumer_id))
+            cursor.execute("UPDATE roles SET budget_limit = ? WHERE id = ?", (float(config["budget_limit"]), role_id))
         if "alert_threshold" in config:
-            cursor.execute("UPDATE consumers SET alert_threshold = ? WHERE id = ?", (float(config["alert_threshold"]), consumer_id))
+            cursor.execute("UPDATE roles SET alert_threshold = ? WHERE id = ?", (float(config["alert_threshold"]), role_id))
             
         # Reset alert_fired if limit increased above current spend
-        cursor.execute("SELECT spent, budget_limit, alert_threshold FROM consumers WHERE id = ?", (consumer_id,))
+        cursor.execute("SELECT spent, budget_limit, alert_threshold FROM roles WHERE id = ?", (role_id,))
         row = cursor.fetchone()
         if row:
             spent, limit, threshold = row["spent"], row["budget_limit"], row["alert_threshold"]
             if spent < (limit * threshold):
-                cursor.execute("UPDATE consumers SET alert_fired = 0 WHERE id = ?", (consumer_id,))
+                cursor.execute("UPDATE roles SET alert_fired = 0 WHERE id = ?", (role_id,))
                 
     conn.commit()
     conn.close()
@@ -157,7 +177,7 @@ def reset_database():
     cursor = conn.cursor()
     cursor.execute("DELETE FROM transactions")
     cursor.execute("DELETE FROM alerts")
-    cursor.execute("UPDATE consumers SET spent = 0.0, alert_fired = 0")
+    cursor.execute("UPDATE roles SET spent = 0.0, alert_fired = 0")
     conn.commit()
     conn.close()
     return get_state()
@@ -167,45 +187,46 @@ def calculate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> fl
     cost = (prompt_tokens * rates["input"] + completion_tokens * rates["output"]) / 1_000_000
     return cost
 
-def record_transaction(consumer_id: str, model: str, prompt_tokens: int, completion_tokens: int, cost: float, latency: float, stream: bool = False):
+def record_transaction(user_id: str, model: str, prompt_tokens: int, completion_tokens: int, cost: float, latency: float, stream: bool = False):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # 1. Ensure consumer exists
-    cursor.execute("SELECT COUNT(*) FROM consumers WHERE id = ?", (consumer_id,))
-    if cursor.fetchone()[0] == 0:
-        cursor.execute(
-            "INSERT INTO consumers (id, name, spent, budget_limit, alert_threshold, alert_fired) VALUES (?, ?, 0.0, 5.0, 0.8, 0)",
-            (consumer_id, consumer_id.replace("-", " ").title())
-        )
-        
-    # 2. Update consumer spend
-    cursor.execute("UPDATE consumers SET spent = spent + ? WHERE id = ?", (cost, consumer_id))
-    
-    # 3. Read updated info
-    cursor.execute("SELECT name, spent, budget_limit, alert_threshold, alert_fired FROM consumers WHERE id = ?", (consumer_id,))
+    # 1. Ensure user exists, if not create linked to general role
+    cursor.execute("SELECT role_id FROM users WHERE id = ?", (user_id,))
     row = cursor.fetchone()
-    name, spent, limit, threshold, alert_fired = row["name"], row["spent"], row["budget_limit"], row["alert_threshold"], row["alert_fired"]
+    if not row:
+        cursor.execute("INSERT OR IGNORE INTO users (id, name, role_id) VALUES (?, ?, 'general')", (user_id, user_id.title()))
+        role_id = 'general'
+    else:
+        role_id = row["role_id"]
+        
+    # 2. Update role spent
+    cursor.execute("UPDATE roles SET spent = spent + ? WHERE id = ?", (cost, role_id))
+    
+    # 3. Read updated role details
+    cursor.execute("SELECT name, spent, budget_limit, alert_threshold, alert_fired FROM roles WHERE id = ?", (role_id,))
+    role_row = cursor.fetchone()
+    role_name, spent, limit, threshold, alert_fired = role_row["name"], role_row["spent"], role_row["budget_limit"], role_row["alert_threshold"], role_row["alert_fired"]
     
     # 4. Insert transaction
     tx_id = f"tx_{int(time.time() * 1000)}"
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     cursor.execute(
         "INSERT INTO transactions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (tx_id, timestamp, consumer_id, model, prompt_tokens, completion_tokens, cost, int(latency * 1000), int(stream))
+        (tx_id, timestamp, user_id, model, prompt_tokens, completion_tokens, cost, int(latency * 1000), int(stream))
     )
     
-    # 5. Check and fire warnings/alerts
+    # 5. Check and fire alerts on role/team budget
     if spent >= (limit * threshold) and not alert_fired:
-        cursor.execute("UPDATE consumers SET alert_fired = 1 WHERE id = ?", (consumer_id,))
+        cursor.execute("UPDATE roles SET alert_fired = 1 WHERE id = ?", (role_id,))
         alert_id = f"alert_{int(time.time() * 1000)}"
-        message = f"¡Alerta de Gasto! El consumidor '{name}' ha superado el {int(threshold * 100)}% de su límite (${spent:.4f} / ${limit:.2f})"
-        cursor.execute("INSERT INTO alerts VALUES (?, ?, ?, ?, ?)", (alert_id, timestamp, consumer_id, message, "warning"))
+        message = f"¡Alerta de Gasto! El rol '{role_name}' ha superado el {int(threshold * 100)}% de su límite (${spent:.4f} / ${limit:.2f})"
+        cursor.execute("INSERT INTO alerts VALUES (?, ?, ?, ?, ?)", (alert_id, timestamp, role_id, message, "warning"))
         
     if spent >= limit:
         alert_id = f"alert_limit_{int(time.time() * 1000)}"
-        message = f"¡LÍMITE EXCEDIDO! El consumidor '{name}' ha agotado su presupuesto (${spent:.4f} / ${limit:.2f})"
-        cursor.execute("INSERT INTO alerts VALUES (?, ?, ?, ?, ?)", (alert_id, timestamp, consumer_id, message, "danger"))
+        message = f"¡LÍMITE EXCEDIDO! El rol '{role_name}' ha agotado su presupuesto (${spent:.4f} / ${limit:.2f})"
+        cursor.execute("INSERT INTO alerts VALUES (?, ?, ?, ?, ?)", (alert_id, timestamp, role_id, message, "danger"))
         
     conn.commit()
     conn.close()

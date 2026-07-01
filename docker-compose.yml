@@ -40,14 +40,18 @@ services:
 
   # AI FinOps Proxy — Intercepts requests and routes to Ollama or Groq
   ai-finops-proxy:
-    build: .
+    image: python:3.11-slim
     container_name: ai-finops-proxy
     ports:
       - "8000:8000"
+    volumes:
+      - .:/app
+    working_dir: /app
     environment:
       - GROQ_API_KEY=${GROQ_API_KEY}
       - PROVIDER_A_URL=http://provider-a.ai.local:11434/v1
       - PROVIDER_B_URL=http://provider-b.ai.local:11434/v1
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && python src/runme.py"
     networks:
       ai_finops_network:
         aliases:

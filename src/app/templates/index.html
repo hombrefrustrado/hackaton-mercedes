@@ -224,8 +224,9 @@
 
         .budget-header {
             display: flex;
-            justify-content: space-between;
+            justify-space: space-between;
             font-size: 0.95rem;
+            justify-content: space-between;
         }
 
         .budget-name {
@@ -630,7 +631,7 @@
                 <div class="budget-list" id="budget-container">
                     <div class="budget-item">
                         <div class="budget-header">
-                            <span class="budget-name">Equipo Marketing</span>
+                            <span class="budget-name">Ana (Marketing)</span>
                             <span class="budget-spend">$0.0000 / $5.00</span>
                         </div>
                         <div class="progress-container">
@@ -644,11 +645,11 @@
             <div class="glass-card">
                 <div class="card-title">Configuración de Gobernanza</div>
                 <div class="form-group">
-                    <label for="config-consumer">Equipo</label>
+                    <label for="config-consumer">Usuario</label>
                     <select id="config-consumer" onchange="loadConfigForm()">
-                        <option value="equipo-marketing">Equipo Marketing</option>
-                        <option value="equipo-producto">Equipo Producto</option>
-                        <option value="default-consumer">Consumidor por Defecto</option>
+                        <option value="ana">Ana</option>
+                        <option value="carlos">Carlos</option>
+                        <option value="default">Usuario Genérico</option>
                     </select>
                 </div>
                 <div class="config-grid">
@@ -708,11 +709,11 @@
                         <div class="pricing-info" id="pricing-badge"></div>
                     </div>
                     <div class="form-group">
-                        <label for="select-consumer">Identificación Consumidor</label>
+                        <label for="select-consumer">Nombre de Usuario (Consumidor)</label>
                         <select id="select-consumer">
-                            <option value="equipo-marketing">Equipo Marketing (Límite: $5.00)</option>
-                            <option value="equipo-producto">Equipo Producto (Límite: $10.00)</option>
-                            <option value="default-consumer">Consumidor por Defecto (Límite: $2.00)</option>
+                            <option value="ana">Ana (Límite: $5.00)</option>
+                            <option value="carlos">Carlos (Límite: $10.00)</option>
+                            <option value="default">Usuario Genérico (Límite: $2.00)</option>
                         </select>
                     </div>
                 </div>
@@ -889,7 +890,7 @@
             container.innerHTML += `
                 <div class="budget-item">
                     <div class="budget-header">
-                        <span class="budget-name">${consumer.name}</span>
+                        <span class="budget-name">${consumer.name} (${consumer.role})</span>
                         <span class="budget-spend">$${spent.toFixed(4)} / $${limit.toFixed(2)} (${pct.toFixed(1)}%)</span>
                     </div>
                     <div class="progress-container">
@@ -1106,7 +1107,7 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-consumer-id": consumer
+                    "x-username": consumer
                 },
                 body: JSON.stringify({
                     messages: [{ role: "user", content: prompt }],

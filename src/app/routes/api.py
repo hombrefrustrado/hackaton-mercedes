@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify, Response
 
 from ..config import PROVIDER_A_URL, PROVIDER_B_URL, PROVIDER_C_URL, GROQ_API_KEY
 from ..database import (
+    get_db_connection,
     get_state,
     update_consumer_config,
     reset_database,
@@ -49,22 +50,42 @@ def handle_proxy(model_name):
     if not resolved:
         return jsonify({"detail": f"Model '{model_name}' is not supported. Supported models: llama3.2:3b, mistral:7b, llama-3.1-8b-instant"}), 404
 
-    # 1. Consumer identification & budget check
-    consumer_id = request.headers.get("x-consumer-id") or request.headers.get("x-team") or "default-consumer"
+    # 1. User identification
+    user_id = request.headers.get("x-username") or request.headers.get("x-user") or "default"
     
-    current_state = get_state()
-    consumer = current_state["consumers"].get(consumer_id)
-    if not consumer:
-        # Auto-create consumer
-        update_consumer_config({consumer_id: {}})
-        current_state = get_state()
-        consumer = current_state["consumers"][consumer_id]
+    # Resolve user to their role in the database to verify limits
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT u.role_id, r.name as role_name, r.spent, r.budget_limit 
+        FROM users u 
+        JOIN roles r ON u.role_id = r.id 
+        WHERE u.id = ?
+    """, (user_id,))
+    row = cursor.fetchone()
+    
+    if not row:
+        # Create user automatically linked to the 'general' role
+        cursor.execute("INSERT OR IGNORE INTO users (id, name, role_id) VALUES (?, ?, 'general')", (user_id, user_id.title()))
+        conn.commit()
+        # Query again
+        cursor.execute("""
+            SELECT u.role_id, r.name as role_name, r.spent, r.budget_limit 
+            FROM users u 
+            JOIN roles r ON u.role_id = r.id 
+            WHERE u.id = ?
+        """, (user_id,))
+        row = cursor.fetchone()
         
-    spent = consumer["spent"]
-    limit = consumer["budget_limit"]
+    role_id = row["role_id"]
+    role_name = row["role_name"]
+    spent = row["spent"]
+    limit = row["budget_limit"]
+    conn.close()
     
+    # Perform limit verification at the role/cost-center level
     if spent >= limit:
-        msg = f"Presupuesto agotado para el consumidor '{consumer['name']}'. Límite: ${limit:.2f}, Gastado: ${spent:.4f}."
+        msg = f"Presupuesto agotado para el rol '{role_name}' (Usuario: '{user_id}'). Límite: ${limit:.2f}, Gastado: ${spent:.4f}."
         logger.error(msg)
         return jsonify({"detail": msg}), 402
 
@@ -104,13 +125,13 @@ def handle_proxy(model_name):
     # 4. Fallback Mock mode if live container is unreachable
     if not is_live:
         if is_stream:
-            return Response(handle_mock_stream(resolved, body, consumer_id, start_time), mimetype="text/event-stream")
+            return Response(handle_mock_stream(resolved, body, user_id, start_time), mimetype="text/event-stream")
         else:
-            return jsonify(handle_mock_non_stream(resolved, body, consumer_id, start_time))
+            return jsonify(handle_mock_non_stream(resolved, body, user_id, start_time))
 
     # 5. Live Mode Proxying
     if is_stream:
-        return Response(handle_live_stream(target_url, headers, body, consumer_id, resolved, start_time), mimetype="text/event-stream")
+        return Response(handle_live_stream(target_url, headers, body, user_id, resolved, start_time), mimetype="text/event-stream")
     else:
         try:
             with httpx.Client(timeout=60.0) as client:
@@ -132,7 +153,7 @@ def handle_proxy(model_name):
                 
                 latency = time.time() - start_time
                 cost = calculate_cost(resolved, prompt_tokens, completion_tokens)
-                record_transaction(consumer_id, resolved, prompt_tokens, completion_tokens, cost, latency, stream=False)
+                record_transaction(user_id, resolved, prompt_tokens, completion_tokens, cost, latency, stream=False)
                 return jsonify(resp_json)
         except Exception as e:
             logger.error(f"Error during live non-stream proxy: {e}")
