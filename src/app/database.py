@@ -91,8 +91,8 @@ def init_db():
     if cursor.fetchone()[0] == 0:
         default_roles = [
             (1, "marketing", 5.0),   # Presupuesto asignado (ej. equivalente a $5.0)
-            (2, "producto", 10.0),   # Presupuesto asignado (ej. equivalente a $10.0)
-            (3, "general", 2.0)      # Presupuesto asignado (ej. equivalente a $2.0)
+            (2, "desarrollo", 10.0),   # Presupuesto asignado (ej. equivalente a $10.0)
+            (3, "RH", 2.0)      # Presupuesto asignado (ej. equivalente a $2.0)
         ]
         cursor.executemany("INSERT INTO Rol VALUES (?, ?, ?)", default_roles)
         
@@ -102,7 +102,7 @@ def init_db():
         default_users = [
             ("ana", "Ana", "pbkdf2:sha256...", 1, 0.0),
             ("carlos", "Carlos", "pbkdf2:sha256...", 2, 0.0),
-            ("default", "Usuario Genérico", "pbkdf2:sha256...", 3, 0.0)
+            ("paco", "Paco", "pbkdf2:sha256...", 3, 0.0)
         ]
         cursor.executemany("INSERT INTO Usuario VALUES (?, ?, ?, ?, ?)", default_users)
         
