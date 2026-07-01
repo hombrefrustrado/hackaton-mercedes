@@ -12,7 +12,7 @@ services:
         aliases:
           - provider-a.ai.local
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      test: [ "CMD", "curl", "-f", "http://localhost:11434/api/tags" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -32,11 +32,29 @@ services:
         aliases:
           - provider-b.ai.local
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      test: [ "CMD", "curl", "-f", "http://localhost:11434/api/tags" ]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 30s
+
+  # AI FinOps Proxy — Intercepts requests and routes to Ollama or Groq
+  ai-finops-proxy:
+    build: .
+    container_name: ai-finops-proxy
+    ports:
+      - "8000:8000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - PROVIDER_A_URL=http://provider-a.ai.local:11434/v1
+      - PROVIDER_B_URL=http://provider-b.ai.local:11434/v1
+    networks:
+      ai_finops_network:
+        aliases:
+          - proxy.ai.local
+    depends_on:
+      - ollama-provider-a
+      - ollama-provider-b
 
 volumes:
   ollama_provider_a:
