@@ -15,138 +15,188 @@ def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # 1. Create Roles Table (Cost Centers with budget limits)
+    # 1. Crear tabla Rol
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS roles (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        spent REAL DEFAULT 0.0,
-        budget_limit REAL DEFAULT 5.0,
-        alert_threshold REAL DEFAULT 0.8,
-        alert_fired INTEGER DEFAULT 0
+    CREATE TABLE IF NOT EXISTS Rol (
+        Id INTEGER PRIMARY KEY,
+        nombre TEXT NOT NULL,
+        presupuesto_tokens NUMERIC
     )
     """)
-    
-    # 2. Create Users Table (Linked to a Role)
+
+    # 2. Crear tabla Modelo
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        role_id TEXT NOT NULL,
-        FOREIGN KEY (role_id) REFERENCES roles (id)
+    CREATE TABLE IF NOT EXISTS Modelo (
+        Nombre TEXT PRIMARY KEY,
+        cpt_in NUMERIC,
+        cpt_out NUMERIC
     )
     """)
-    
-    # 3. Create Transactions Table
+
+    # 3. Crear tabla Usuario (Clave primaria: Email)
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS transactions (
-        id TEXT PRIMARY KEY,
-        timestamp TEXT NOT NULL,
-        user_id TEXT NOT NULL,
-        model TEXT NOT NULL,
-        prompt_tokens INTEGER NOT NULL,
-        completion_tokens INTEGER NOT NULL,
-        cost REAL NOT NULL,
-        latency_ms INTEGER NOT NULL,
-        stream INTEGER NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users (id)
+    CREATE TABLE IF NOT EXISTS Usuario (
+        Email TEXT PRIMARY KEY,
+        nombre TEXT NOT NULL,
+        password TEXT NOT NULL,
+        rol INTEGER,
+        cuota_utilizada NUMERIC DEFAULT 0,
+        FOREIGN KEY (rol) REFERENCES Rol(Id)
     )
     """)
-    
-    # 4. Create Alerts Table
+
+    # 4. Crear tabla Query (Usuario actúa como Foreign Key hacia Usuario.Email)
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS alerts (
-        id TEXT PRIMARY KEY,
-        timestamp TEXT NOT NULL,
-        role_id TEXT NOT NULL,
-        message TEXT NOT NULL,
-        severity TEXT NOT NULL,
-        FOREIGN KEY (role_id) REFERENCES roles (id)
+    CREATE TABLE IF NOT EXISTS Query (
+        Usuario TEXT,
+        Fecha TIMESTAMP,
+        Consulta VARCHAR,
+        Modelo VARCHAR,
+        Num_tokens_out NUMERIC,
+        Num_tokens_in NUMERIC,
+        PRIMARY KEY (Usuario, Fecha),
+        FOREIGN KEY (Usuario) REFERENCES Usuario(Email),
+        FOREIGN KEY (Modelo) REFERENCES Modelo(Nombre)
     )
     """)
+
+    # 5. Crear el Trigger corrigiendo la asociación por Email
+    cursor.execute("""
+    CREATE TRIGGER IF NOT EXISTS trg_actualizar_cuota_usuario
+    BEFORE INSERT ON Query
+    FOR EACH ROW
+    BEGIN
+        UPDATE Usuario
+        SET cuota_utilizada = cuota_utilizada + (
+            (NEW.Num_tokens_in * (SELECT cpt_in FROM Modelo WHERE Nombre = NEW.Modelo)) +
+            (NEW.Num_tokens_out * (SELECT cpt_out FROM Modelo WHERE Nombre = NEW.Modelo))
+        )
+        WHERE Email = NEW.Usuario;
+    END;
+    """)
+
+    print("¡Tablas y trigger corregidos y creados exitosamente!")
     
-    # Seed default roles if empty
-    cursor.execute("SELECT COUNT(*) FROM roles")
+    # Seed de Modelos desde el diccionario PRICING si está vacío
+    cursor.execute("SELECT COUNT(*) FROM Modelo")
+    if cursor.fetchone()[0] == 0:
+        for model_name, rates in PRICING.items():
+            # Convertimos el precio por millón a coste unitario por token para el Trigger
+            cpt_in = rates.get("input", 0.0) / 1_000_000
+            cpt_out = rates.get("output", 0.0) / 1_000_000
+            cursor.execute("INSERT INTO Modelo VALUES (?, ?, ?)", (model_name, cpt_in, cpt_out))
+    
+    # Seed de Roles por defecto si está vacío
+    cursor.execute("SELECT COUNT(*) FROM Rol")
     if cursor.fetchone()[0] == 0:
         default_roles = [
-            ("marketing", "Marketing", 0.0, 5.0, 0.8, 0),
-            ("producto", "Producto", 0.0, 10.0, 0.8, 0),
-            ("general", "General", 0.0, 2.0, 0.8, 0)
+            (1, "marketing", 5.0),   # Presupuesto asignado (ej. equivalente a $5.0)
+            (2, "producto", 10.0),   # Presupuesto asignado (ej. equivalente a $10.0)
+            (3, "general", 2.0)      # Presupuesto asignado (ej. equivalente a $2.0)
         ]
-        cursor.executemany("INSERT INTO roles VALUES (?, ?, ?, ?, ?, ?)", default_roles)
+        cursor.executemany("INSERT INTO Rol VALUES (?, ?, ?)", default_roles)
         
-    # Seed default users linked to roles if empty
-    cursor.execute("SELECT COUNT(*) FROM users")
+    # Seed de Usuarios por defecto vinculados a sus roles si está vacío
+    cursor.execute("SELECT COUNT(*) FROM Usuario")
     if cursor.fetchone()[0] == 0:
         default_users = [
-            ("ana", "Ana", "marketing"),
-            ("carlos", "Carlos", "producto"),
-            ("default", "Usuario Genérico", "general")
+            ("ana", "Ana", "pbkdf2:sha256...", 1, 0.0),
+            ("carlos", "Carlos", "pbkdf2:sha256...", 2, 0.0),
+            ("default", "Usuario Genérico", "pbkdf2:sha256...", 3, 0.0)
         ]
-        cursor.executemany("INSERT INTO users VALUES (?, ?, ?)", default_users)
+        cursor.executemany("INSERT INTO Usuario VALUES (?, ?, ?, ?, ?)", default_users)
         
     conn.commit()
     conn.close()
-    logger.info("SQLite database initialized with separate Roles and Users tables.")
+    logger.info("SQLite database initialized with clean Relational Schema.")
 
-# Initialize database on module load
+# Inicializar Base de datos al cargar el módulo
 init_db()
 
 def get_state():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Retrieve roles (for budget limits dashboard display)
-    cursor.execute("SELECT * FROM roles")
+    # 1. Mapear Consumidores (Roles) calculando el gasto acumulado de sus usuarios
+    cursor.execute("""
+        SELECT r.Id, r.nombre, r.presupuesto_tokens, COALESCE(SUM(u.cuota_utilizada), 0) as spent
+        FROM Rol r
+        LEFT JOIN Usuario u ON u.rol = r.Id
+        GROUP BY r.Id
+    """)
     consumers = {}
-    for r in cursor.fetchall():
-        consumers[r["id"]] = {
-            "name": r["name"],
-            "spent": r["spent"],
-            "budget_limit": r["budget_limit"],
-            "alert_threshold": r["alert_threshold"],
-            "alert_fired": bool(r["alert_fired"])
+    roles_data = cursor.fetchall()
+    
+    for r in roles_data:
+        role_key = r["nombre"].lower()
+        spent = r["spent"]
+        limit = r["presupuesto_tokens"]
+        
+        consumers[role_key] = {
+            "name": r["nombre"].title(),
+            "spent": spent,
+            "budget_limit": limit,
+            "alert_threshold": 0.8, # Umbral por defecto al 80%
+            "alert_fired": spent >= (limit * 0.8) if limit > 0 else False
         }
         
-    # Retrieve transactions with user & role joining
+    # 2. Recuperar el historial de transacciones desde la tabla Query
     cursor.execute("""
-        SELECT t.*, u.name as user_name, r.name as role_name 
-        FROM transactions t
-        JOIN users u ON t.user_id = u.id
-        JOIN roles r ON u.role_id = r.id
-        ORDER BY t.timestamp ASC
+        SELECT q.rowid as id, q.Fecha as timestamp, q.Usuario as user_id, 
+               u.nombre as user_name, r.nombre as role_name, q.Modelo as model,
+               q.Num_tokens_in as prompt_tokens, q.Num_tokens_out as completion_tokens,
+               (q.Num_tokens_in * m.cpt_in + q.Num_tokens_out * m.cpt_out) as cost
+        FROM Query q
+        JOIN Usuario u ON q.Usuario = u.Email
+        JOIN Rol r ON u.rol = r.Id
+        JOIN Modelo m ON q.Modelo = m.Nombre
+        ORDER BY q.Fecha ASC
     """)
     transactions = []
     for r in cursor.fetchall():
         transactions.append({
-            "id": r["id"],
+            "id": f"tx_{r['id']}",
             "timestamp": r["timestamp"],
             "consumer_id": r["user_id"],
-            "consumer_name": f"{r['user_name']} ({r['role_name']})",
+            "consumer_name": f"{r['user_name']} ({r['role_name'].title()})",
             "model": r["model"],
             "prompt_tokens": r["prompt_tokens"],
             "completion_tokens": r["completion_tokens"],
             "cost": r["cost"],
-            "latency_ms": r["latency_ms"],
-            "stream": bool(r["stream"])
+            "latency_ms": 0,       # No guardado en el esquema actual (mockeado para UI)
+            "stream": False        # No guardado en el esquema actual (mockeado para UI)
         })
         
-    # Retrieve alerts
-    cursor.execute("SELECT * FROM alerts ORDER BY timestamp ASC")
+    # 3. Generar Alertas Dinámicas basadas en el presupuesto consumido actual
     alerts = []
-    for r in cursor.fetchall():
-        alerts.append({
-            "id": r["id"],
-            "timestamp": r["timestamp"],
-            "consumer_id": r["role_id"],
-            "consumer_name": r["role_id"].title(),
-            "message": r["message"],
-            "severity": r["severity"]
-        })
+    for r in roles_data:
+        role_key = r["nombre"].lower()
+        spent = r["spent"]
+        limit = r["presupuesto_tokens"]
+        
+        if limit > 0:
+            if spent >= limit:
+                alerts.append({
+                    "id": f"alert_limit_{role_key}_{int(time.time())}",
+                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "consumer_id": role_key,
+                    "consumer_name": r["nombre"].title(),
+                    "message": f"¡LÍMITE EXCEDIDO! El rol '{r['nombre']}' ha agotado su presupuesto (${spent:.4f} / ${limit:.2f})",
+                    "severity": "danger"
+                })
+            elif spent >= (limit * 0.8):
+                alerts.append({
+                    "id": f"alert_warn_{role_key}_{int(time.time())}",
+                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "consumer_id": role_key,
+                    "consumer_name": r["nombre"].title(),
+                    "message": f"¡Alerta de Gasto! El rol '{r['nombre']}' ha superado el 80% de su límite (${spent:.4f} / ${limit:.2f})",
+                    "severity": "warning"
+                })
         
     conn.close()
     return {
-        "consumers": consumers, # Mapped to roles for backward compatibility with UI
+        "consumers": consumers,
         "transactions": transactions,
         "alerts": alerts
     }
@@ -156,18 +206,8 @@ def update_consumer_config(data: dict):
     cursor = conn.cursor()
     for role_id, config in data.items():
         if "budget_limit" in config:
-            cursor.execute("UPDATE roles SET budget_limit = ? WHERE id = ?", (float(config["budget_limit"]), role_id))
-        if "alert_threshold" in config:
-            cursor.execute("UPDATE roles SET alert_threshold = ? WHERE id = ?", (float(config["alert_threshold"]), role_id))
+            cursor.execute("UPDATE Rol SET presupuesto_tokens = ? WHERE LOWER(nombre) = LOWER(?)", (float(config["budget_limit"]), role_id))
             
-        # Reset alert_fired if limit increased above current spend
-        cursor.execute("SELECT spent, budget_limit, alert_threshold FROM roles WHERE id = ?", (role_id,))
-        row = cursor.fetchone()
-        if row:
-            spent, limit, threshold = row["spent"], row["budget_limit"], row["alert_threshold"]
-            if spent < (limit * threshold):
-                cursor.execute("UPDATE roles SET alert_fired = 0 WHERE id = ?", (role_id,))
-                
     conn.commit()
     conn.close()
     return get_state()
@@ -175,58 +215,49 @@ def update_consumer_config(data: dict):
 def reset_database():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM transactions")
-    cursor.execute("DELETE FROM alerts")
-    cursor.execute("UPDATE roles SET spent = 0.0, alert_fired = 0")
+    cursor.execute("DELETE FROM Query")
+    cursor.execute("UPDATE Usuario SET cuota_utilizada = 0.0")
     conn.commit()
     conn.close()
     return get_state()
 
 def calculate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> float:
+    # Intenta obtener el coste dinámicamente desde la tabla Modelo
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT cpt_in, cpt_out FROM Modelo WHERE Nombre = ?", (model,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return (prompt_tokens * row["cpt_in"]) + (completion_tokens * row["cpt_out"])
+    except Exception:
+        pass
+        
+    # Fallback al diccionario estático si la DB no está disponible
     rates = PRICING.get(model, {"input": 0.0, "output": 0.0})
-    cost = (prompt_tokens * rates["input"] + completion_tokens * rates["output"]) / 1_000_000
-    return cost
+    return (prompt_tokens * rates["input"] + completion_tokens * rates["output"]) / 1_000_000
 
 def record_transaction(user_id: str, model: str, prompt_tokens: int, completion_tokens: int, cost: float, latency: float, stream: bool = False):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # 1. Ensure user exists, if not create linked to general role
-    cursor.execute("SELECT role_id FROM users WHERE id = ?", (user_id,))
+    # 1. Asegurar que el usuario existe en la tabla Usuario; si no, lo vinculamos al rol 'general' (ID: 3)
+    cursor.execute("SELECT rol FROM Usuario WHERE Email = ?", (user_id,))
     row = cursor.fetchone()
     if not row:
-        cursor.execute("INSERT OR IGNORE INTO users (id, name, role_id) VALUES (?, ?, 'general')", (user_id, user_id.title()))
-        role_id = 'general'
-    else:
-        role_id = row["role_id"]
+        cursor.execute(
+            "INSERT OR IGNORE INTO Usuario (Email, nombre, password, rol, cuota_utilizada) VALUES (?, ?, 'default_pass', 3, 0.0)", 
+            (user_id, user_id.title())
+        )
         
-    # 2. Update role spent
-    cursor.execute("UPDATE roles SET spent = spent + ? WHERE id = ?", (cost, role_id))
-    
-    # 3. Read updated role details
-    cursor.execute("SELECT name, spent, budget_limit, alert_threshold, alert_fired FROM roles WHERE id = ?", (role_id,))
-    role_row = cursor.fetchone()
-    role_name, spent, limit, threshold, alert_fired = role_row["name"], role_row["spent"], role_row["budget_limit"], role_row["alert_threshold"], role_row["alert_fired"]
-    
-    # 4. Insert transaction
-    tx_id = f"tx_{int(time.time() * 1000)}"
+    # 2. Insertar la transacción en la tabla Query
+    # ¡Ojo! El trigger 'trg_actualizar_cuota_usuario' se encargará automáticamente de actualizar la cuota del usuario.
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     cursor.execute(
-        "INSERT INTO transactions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (tx_id, timestamp, user_id, model, prompt_tokens, completion_tokens, cost, int(latency * 1000), int(stream))
+        "INSERT INTO Query (Usuario, Fecha, Consulta, Modelo, Num_tokens_out, Num_tokens_in) VALUES (?, ?, ?, ?, ?, ?)",
+        (user_id, timestamp, "API Proxy Request", model, completion_tokens, prompt_tokens)
     )
-    
-    # 5. Check and fire alerts on role/team budget
-    if spent >= (limit * threshold) and not alert_fired:
-        cursor.execute("UPDATE roles SET alert_fired = 1 WHERE id = ?", (role_id,))
-        alert_id = f"alert_{int(time.time() * 1000)}"
-        message = f"¡Alerta de Gasto! El rol '{role_name}' ha superado el {int(threshold * 100)}% de su límite (${spent:.4f} / ${limit:.2f})"
-        cursor.execute("INSERT INTO alerts VALUES (?, ?, ?, ?, ?)", (alert_id, timestamp, role_id, message, "warning"))
-        
-    if spent >= limit:
-        alert_id = f"alert_limit_{int(time.time() * 1000)}"
-        message = f"¡LÍMITE EXCEDIDO! El rol '{role_name}' ha agotado su presupuesto (${spent:.4f} / ${limit:.2f})"
-        cursor.execute("INSERT INTO alerts VALUES (?, ?, ?, ?, ?)", (alert_id, timestamp, role_id, message, "danger"))
         
     conn.commit()
     conn.close()

@@ -50,30 +50,35 @@ def handle_proxy(model_name):
     if not resolved:
         return jsonify({"detail": f"Model '{model_name}' is not supported. Supported models: llama3.2:3b, mistral:7b, llama-3.1-8b-instant"}), 404
 
-    # 1. User identification
+    # 1. User identification (email/username in the header)
     user_id = request.headers.get("x-username") or request.headers.get("x-user") or "default"
     
-    # Resolve user to their role in the database to verify limits
+    # Resolve user to their role in the database and compute total spent of the role
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT u.role_id, r.name as role_name, r.spent, r.budget_limit 
-        FROM users u 
-        JOIN roles r ON u.role_id = r.id 
-        WHERE u.id = ?
+        SELECT u.rol as role_id, r.nombre as role_name, r.presupuesto_tokens as budget_limit,
+               (SELECT COALESCE(SUM(u2.cuota_utilizada), 0) FROM Usuario u2 WHERE u2.rol = r.Id) as spent
+        FROM Usuario u 
+        JOIN Rol r ON u.rol = r.Id 
+        WHERE u.Email = ?
     """, (user_id,))
     row = cursor.fetchone()
     
     if not row:
-        # Create user automatically linked to the 'general' role
-        cursor.execute("INSERT OR IGNORE INTO users (id, name, role_id) VALUES (?, ?, 'general')", (user_id, user_id.title()))
+        # Create user automatically linked to the 'general' role (ID: 3)
+        cursor.execute(
+            "INSERT OR IGNORE INTO Usuario (Email, nombre, password, rol, cuota_utilizada) VALUES (?, ?, 'default_pass', 3, 0.0)",
+            (user_id, user_id.title())
+        )
         conn.commit()
         # Query again
         cursor.execute("""
-            SELECT u.role_id, r.name as role_name, r.spent, r.budget_limit 
-            FROM users u 
-            JOIN roles r ON u.role_id = r.id 
-            WHERE u.id = ?
+            SELECT u.rol as role_id, r.nombre as role_name, r.presupuesto_tokens as budget_limit,
+                   (SELECT COALESCE(SUM(u2.cuota_utilizada), 0) FROM Usuario u2 WHERE u2.rol = r.Id) as spent
+            FROM Usuario u 
+            JOIN Rol r ON u.rol = r.Id 
+            WHERE u.Email = ?
         """, (user_id,))
         row = cursor.fetchone()
         
@@ -83,7 +88,7 @@ def handle_proxy(model_name):
     limit = row["budget_limit"]
     conn.close()
     
-    # Perform limit verification at the role/cost-center level
+    # Perform limit verification at the role level
     if spent >= limit:
         msg = f"Presupuesto agotado para el rol '{role_name}' (Usuario: '{user_id}'). Límite: ${limit:.2f}, Gastado: ${spent:.4f}."
         logger.error(msg)
@@ -107,11 +112,28 @@ def handle_proxy(model_name):
     is_stream = body.get("stream", False)
     start_time = time.time()
 
+<<<<<<< HEAD
     # 3. Use live mode for local models always, fallback to mock only for Groq if key is missing
     is_live = True
     if resolved == "llama-3.1-8b-instant" and not GROQ_API_KEY:
         is_live = False
         logger.info("Groq key not configured. Falling back to simulation.")
+=======
+    # 3. Connection health test to auto-detect if live mode is possible
+    is_live = False
+    try:
+        if resolved == "llama-3.1-8b-instant" and not GROQ_API_KEY:
+            raise Exception("Groq key not configured")
+            
+        ping_url = PROVIDER_A_URL.replace("/v1", "") if resolved == "llama3.2:3b" else (PROVIDER_B_URL.replace("/v1", "") if resolved == "mistral:7b" else PROVIDER_C_URL)
+        ping_headers = {"Authorization": f"Bearer {GROQ_API_KEY}"} if (resolved == "llama-3.1-8b-instant" and GROQ_API_KEY) else {}
+        
+        with httpx.Client(timeout=3.0) as client:
+            client.get(ping_url, headers=ping_headers)
+        is_live = True
+    except Exception as e:
+        logger.info(f"Ollama/Groq container offline or API error: {e}. Falling back to simulation.")
+>>>>>>> cba11f264075454955abba24651582efbe36a722
 
     # 4. Fallback Mock mode
     if not is_live:
