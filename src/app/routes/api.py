@@ -108,15 +108,16 @@ def handle_proxy(model_name):
     start_time = time.time()
 
     # 3. Connection health test to auto-detect if live mode is possible
+    # We query the Ollama base port (without /v1) which returns 'Ollama is running' immediately
     is_live = False
     try:
         if resolved == "llama-3.1-8b-instant" and not GROQ_API_KEY:
             raise Exception("Groq key not configured")
             
-        ping_url = PROVIDER_A_URL if resolved == "llama3.2:3b" else (PROVIDER_B_URL if resolved == "mistral:7b" else PROVIDER_C_URL)
+        ping_url = PROVIDER_A_URL.replace("/v1", "") if resolved == "llama3.2:3b" else (PROVIDER_B_URL.replace("/v1", "") if resolved == "mistral:7b" else PROVIDER_C_URL)
         ping_headers = {"Authorization": f"Bearer {GROQ_API_KEY}"} if (resolved == "llama-3.1-8b-instant" and GROQ_API_KEY) else {}
         
-        with httpx.Client(timeout=0.5) as client:
+        with httpx.Client(timeout=3.0) as client:
             client.get(ping_url, headers=ping_headers)
         is_live = True
     except Exception as e:

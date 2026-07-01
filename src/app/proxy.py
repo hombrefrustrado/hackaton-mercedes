@@ -2,6 +2,7 @@ import json
 import time
 import httpx
 import logging
+import threading
 from typing import Dict, Any, Optional
 from .config import PROVIDER_A_URL, PROVIDER_B_URL, PROVIDER_C_URL, GROQ_API_KEY
 
@@ -40,6 +41,46 @@ def get_health_status() -> Dict[str, Any]:
         "llama-3.1-8b-instant": check_url_health(PROVIDER_C_URL, headers_c)
     }
     return health
+
+def ensure_model_pulled(provider_url: str, model_name: str):
+    """Checks if a model is pulled in Ollama, and triggers a pull if missing."""
+    base_url = provider_url.replace("/v1", "")
+    try:
+        with httpx.Client(timeout=5.0) as client:
+            # Check existing tags
+            res = client.get(f"{base_url}/api/tags")
+            if res.status_code == 200:
+                models = res.json().get("models", [])
+                pulled_names = [m["name"] for m in models]
+                if any(model_name in name for name in pulled_names):
+                    logger.info(f"Model '{model_name}' is already pulled on '{base_url}'.")
+                    return True
+                
+                logger.info(f"Model '{model_name}' not found on '{base_url}'. Triggering pull...")
+                # Call Ollama's pull endpoint asynchronously (stream=False, timeout=1.0)
+                client.post(f"{base_url}/api/pull", json={"name": model_name, "stream": False}, timeout=1.0)
+                logger.info(f"Background pull request for '{model_name}' accepted by '{base_url}'.")
+                return True
+    except httpx.ReadTimeout:
+        # Expected since we set a short timeout to run it in the background
+        logger.info(f"Pull of '{model_name}' has started in the background on '{base_url}'.")
+        return True
+    except Exception as e:
+        logger.warning(f"Could not verify/pull model '{model_name}' on '{base_url}': {e}")
+    return False
+
+def start_background_pulls():
+    """Starts background threads to pull models on local providers if missing."""
+    def worker():
+        # Wait a few seconds for containers to initialize fully
+        time.sleep(5)
+        ensure_model_pulled(PROVIDER_A_URL, "llama3.2:3b")
+        ensure_model_pulled(PROVIDER_B_URL, "mistral:7b")
+
+    threading.Thread(target=worker, daemon=True).start()
+
+# Start background pull worker on module import
+start_background_pulls()
 
 def handle_mock_stream(resolved_model: str, body: dict, consumer_id: str, start_time: float):
     responses = {
