@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-grid" style="grid-template-columns: 1.2fr 0.8fr; gap: 2rem;">
+    
+    <!-- Panel Principal: Enrutador KNN y Métricas -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <div class="glass-card">
+            <div class="card-title">
+                Pilar 3: Enrutamiento Inteligente (AI Router)
+                <span class="badge" style="background:var(--accent-primary-glow); color:#c084fc;">K-NN Activo</span>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem; color: var(--text-secondary); line-height: 1.6;">
+                <p>El gateway de control de costes incluye un sistema de enrutamiento inteligente dinámico que intercepta las peticiones enviadas al endpoint <code>/api/v1/auto</code> y selecciona el modelo de IA más apropiado.</p>
+                
+                <div style="background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.15); padding: 1.25rem; border-radius: 8px; color: #fff;">
+                    <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; color: #c084fc; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>🧠</span> Modelo KNN Implementado (modelo_knn_ej8.joblib)
+                    </div>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                        Hemos integrado exitosamente el clasificador entrenado por el equipo de ciencia de datos. El proxy de Flask procesa en tiempo real las solicitudes entrantes utilizando la siguiente configuración técnica:
+                    </p>
+                    <ul style="font-size: 0.88rem; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; color: var(--text-primary);">
+                        <li><strong>Algoritmo:</strong> <code>KNeighborsClassifier(n_neighbors=3, metric='precomputed')</code></li>
+                        <li><strong>Métrica de Distancia:</strong> <code>Distancia de Gower</code> (calculada dinámicamente sobre variables categóricas y numéricas).</li>
+                        <li><strong>Variables Predictoras (Features):</strong>
+                            <ul style="padding-left: 1rem; margin-top: 0.25rem; color: var(--text-secondary);">
+                                <li><code>departamento</code> (Rol/Equipo del usuario: marketing, desarrollo, rrhh).</li>
+                                <li><code>prompt_tokens</code> (Estimado del tamaño de entrada).</li>
+                                <li><code>latency_s</code>, <code>completion_tokens</code>, <code>total_tokens</code>, <code>cost</code> (Imputados con las medianas de entrenamiento).</li>
+                            </ul>
+                        </li>
+                        <li><strong>Resolución Destino:</strong> Enruta de forma fluida a <code>llama3.2:3b</code>, <code>mistral:7b</code>, o <code>llama-3.1-8b-instant</code>.</li>
+                    </ul>
+                </div>
+
+                <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
+                    <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem;">Próximos Pasos (Espacio para el Equipo)</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">
+                        El equipo de desarrollo puede completar este módulo implementando las reglas de negocio FinOps avanzadas, simulaciones de fallos cruzados (failover) y análisis de ahorro obtenido frente al modelo más caro por defecto.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta de Reglas de Enrutamiento y Negocio -->
+        <div class="glass-card">
+            <div class="card-title">Reglas de Negocio FinOps (Placeholder)</div>
+            <div style="font-size: 0.9rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.75rem;">
+                <p>Configura las reglas para balancear el coste y la latencia según necesidades operativas:</p>
+                <div style="opacity: 0.5; pointer-events: none;">
+                    <div class="form-group">
+                        <label>Prioridad de Optimización</label>
+                        <select disabled>
+                            <option>Minimizar Coste (Por defecto - KNN clasificado)</option>
+                            <option>Minimizar Latencia</option>
+                            <option>Calidad / Contexto Máximo</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                        <label class="toggle-container">
+                            <span class="switch"><input type="checkbox" checked disabled><span class="slider"></span></span>
+                            <span>Forzar enrutamiento local si la nube excede $0.05/llamada</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="alert-item warning" style="margin-top: 0.5rem;">
+                    <span>⏳</span>
+                    <div>Sección pendiente de implementación por el equipo de desarrollo FinOps.</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Panel Lateral: Estados de Failover y Redirección -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- Tolerancia a Fallos (High Availability) -->
+        <div class="glass-card">
+            <div class="card-title">Manejo de Fallos (Redirección Automática)</div>
+            <div style="font-size: 0.9rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.75rem;">
+                <p>El gateway monitoriza la salud de los proveedores. Si el modelo clasificado por el KNN se encuentra caído o inaccesible, el tráfico se redirigirá automáticamente a un nodo secundario de respaldo.</p>
+                
+                <div style="border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem; background: rgba(0,0,0,0.2);">
+                    <div style="font-weight: 600; color: #fff; margin-bottom: 0.5rem; font-size: 0.85rem;">Esquema de Respaldo:</div>
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; font-family: monospace;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color:var(--accent-warning);">Llama 3.2 (Caído)</span>
+                            <span style="color:var(--text-muted);">➔</span>
+                            <span style="color:var(--accent-success);">Llama Groq (Respaldo)</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color:var(--accent-warning);">Mistral 7B (Caído)</span>
+                            <span style="color:var(--text-muted);">➔</span>
+                            <span style="color:var(--accent-success);">Llama Groq (Respaldo)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-item info" style="margin-top: 0.5rem;">
+                    <span>ℹ️</span>
+                    <div>El sistema actual realiza la redirección simulada si los contenedores locales de Ollama no responden.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matriz de Modelos y Capacidades -->
+        <div class="glass-card">
+            <div class="card-title">Matriz de Modelos Disponibles</div>
+            <div class="table-wrapper" style="font-size: 0.8rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Modelo</th>
+                            <th>Coste (/1M)</th>
+                            <th>Velocidad</th>
+                            <th>Salud</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="tx-badge llama">Llama 3.2 3B</span></td>
+                            <td>$0.06</td>
+                            <td>Rápida (Local)</td>
+                            <td><span style="color: var(--accent-success);">● Live</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tx-badge mistral">Mistral 7B</span></td>
+                            <td>$0.24</td>
+                            <td>Media (Local)</td>
+                            <td><span style="color: var(--accent-success);">● Live</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tx-badge groq">Groq 8B</span></td>
+                            <td>$0.05 / $0.08</td>
+                            <td>Instantánea (Cloud)</td>
+                            <td><span style="color: var(--accent-success);">● Live</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function initPageSpecific() {
+        // No specific initialization needed for this static/placeholder page
+    }
+
+    function renderBudgets() {
+        // Callback support for base.html
+    }
+
+    function renderAlerts() {
+        // Callback support for base.html
+    }
+
+    function renderRecommendations() {
+        // Callback support for base.html
+    }
+
+    function updatePilar1Stats() {
+        // Callback support for base.html
+    }
+</script>
+{% endblock %}

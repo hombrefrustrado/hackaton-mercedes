@@ -43,6 +43,12 @@ def api_reset_db():
 def api_get_health():
     return jsonify(get_health_status())
 
+@api_bp.route("/api/finops/forecast", methods=["GET"])
+def api_get_forecast():
+    role = request.args.get("role", "todos")
+    from ..utils.forecast import get_forecast_data
+    return jsonify(get_forecast_data(role))
+
 @api_bp.route("/api/v1/<model_name>", methods=["POST"])
 @api_bp.route("/api/v1/<model_name>/chat/completions", methods=["POST"])
 def handle_proxy(model_name):
@@ -96,6 +102,19 @@ def handle_proxy(model_name):
 
     # 2. Extract request body
     body = request.get_json(silent=True) or {}
+    
+    # Run KNN classifier if auto-routing is requested
+    if resolved == "auto":
+        from ..utils.knn_routing import predict_knn_model
+        prompt = ""
+        for msg in body.get("messages", []):
+            prompt += msg.get("content", "")
+        prompt_tokens = max(1, round(len(prompt) / 4))
+        
+        # Predict using KNN classifier
+        resolved = predict_knn_model(role_name.lower(), prompt_tokens)
+        logger.info(f"KNN Classifier selected model '{resolved}' for role '{role_name}' and {prompt_tokens} prompt tokens.")
+
     body["model"] = resolved
     
     # Target configurations

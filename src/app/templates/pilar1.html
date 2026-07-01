@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-grid" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
+    
+    <!-- Resumen y KPI de Costes -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <div class="glass-card">
+            <div class="card-title">Resumen de Gasto FinOps</div>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label>Gasto Acumulado Total</label>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: #fff;" id="p1-total-cost">$0.00000</div>
+                </div>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label>Peticiones Totales</label>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);" id="p1-total-requests">0</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Consumo Total de Tokens</label>
+                        <div style="font-size: 1.1rem; font-weight: 600; color: var(--text-secondary);" id="p1-total-tokens">In: 0 / Out: 0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desglose por Consumidor / Equipo -->
+        <div class="glass-card">
+            <div class="card-title">Desglose de Coste por Equipo / Consumidor</div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Consumidor (Equipo)</th>
+                            <th>Peticiones</th>
+                            <th>Tokens (In/Out)</th>
+                            <th>Gasto Total</th>
+                            <th>Gasto Medio/Req</th>
+                        </tr>
+                    </thead>
+                    <tbody id="p1-consumer-body">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-muted);">Cargando desglose...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desglose por Modelo y Verificación de Precisión -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- Consumo por Modelo -->
+        <div class="glass-card">
+            <div class="card-title">Consumo por Modelo / Proveedor</div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Modelo</th>
+                            <th>Peticiones</th>
+                            <th>Tokens (In/Out)</th>
+                            <th>Gasto Acumulado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="p1-model-body">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: var(--text-muted);">Cargando modelos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Verificación de Precisión de Precios -->
+        <div class="glass-card">
+            <div class="card-title">
+                Auditoría de Tarifas y Precisión
+                <span class="badge">Validado</span>
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.75rem;">
+                <p>Para garantizar que <strong>los datos son precisos respecto a las tarifas del proveedor</strong>, el proxy utiliza la siguiente fórmula para cada transacción:</p>
+                <div style="background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 6px; font-family: monospace; color: #fff; text-align: center; border: 1px solid var(--border-color);">
+                    Coste = (Tokens Entrada × Tarifa In) + (Tokens Salida × Tarifa Out)
+                </div>
+                <p>Tarifas oficiales configuradas por cada 1,000,000 de tokens:</p>
+                <table style="font-size: 0.85rem; margin-top: 0.25rem;">
+                    <thead>
+                        <tr>
+                            <th>Modelo</th>
+                            <th>Tarifa Entrada (/1M)</th>
+                            <th>Tarifa Salida (/1M)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="tx-badge llama">llama3.2:3b</span></td>
+                            <td>$0.06</td>
+                            <td>$0.06</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tx-badge mistral">mistral:7b</span></td>
+                            <td>$0.24</td>
+                            <td>$0.24</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tx-badge groq">llama-3.1-8b-instant</span></td>
+                            <td>$0.05</td>
+                            <td>$0.08</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">Nota: Las llamadas simuladas calculan de forma transparente el uso de caracteres dividido entre 4 para aproximar tokens reales si no se captura el uso nativo, coincidiendo con la heurística estándar.</p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function updatePilar1Stats() {
+        const txs = state.transactions;
+        
+        let totalCost = 0;
+        let totalRequests = txs.length;
+        let totalPromptTokens = 0;
+        let totalCompletionTokens = 0;
+        
+        const modelStats = {
+            "llama3.2:3b": { count: 0, cost: 0, prompt: 0, completion: 0 },
+            "mistral:7b": { count: 0, cost: 0, prompt: 0, completion: 0 },
+            "llama-3.1-8b-instant": { count: 0, cost: 0, prompt: 0, completion: 0 }
+        };
+        
+        const consumerStats = {
+            "ana": { name: "Ana (Marketing)", count: 0, cost: 0, prompt: 0, completion: 0 },
+            "carlos": { name: "Carlos (Desarrollo)", count: 0, cost: 0, prompt: 0, completion: 0 },
+            "paco": { name: "Paco (RRHH)", count: 0, cost: 0, prompt: 0, completion: 0 },
+            "default": { name: "Usuario Genérico", count: 0, cost: 0, prompt: 0, completion: 0 }
+        };
+        
+        txs.forEach(tx => {
+            const cost = tx.cost;
+            totalCost += cost;
+            totalPromptTokens += tx.prompt_tokens;
+            totalCompletionTokens += tx.completion_tokens;
+            
+            const modelKey = tx.model;
+            if (modelStats[modelKey]) {
+                modelStats[modelKey].count++;
+                modelStats[modelKey].cost += cost;
+                modelStats[modelKey].prompt += tx.prompt_tokens;
+                modelStats[modelKey].completion += tx.completion_tokens;
+            }
+            
+            const userKey = tx.consumer_id;
+            if (consumerStats[userKey]) {
+                consumerStats[userKey].count++;
+                consumerStats[userKey].cost += cost;
+                consumerStats[userKey].prompt += tx.prompt_tokens;
+                consumerStats[userKey].completion += tx.completion_tokens;
+            } else {
+                consumerStats[userKey] = {
+                    name: tx.consumer_name,
+                    count: 1,
+                    cost: cost,
+                    prompt: tx.prompt_tokens,
+                    completion: tx.completion_tokens
+                };
+            }
+        });
+        
+        document.getElementById("p1-total-cost").innerText = `$${totalCost.toFixed(5)}`;
+        document.getElementById("p1-total-requests").innerText = totalRequests;
+        document.getElementById("p1-total-tokens").innerText = `In: ${totalPromptTokens.toLocaleString()} / Out: ${totalCompletionTokens.toLocaleString()}`;
+        
+        const consumerBody = document.getElementById("p1-consumer-body");
+        if (consumerBody) {
+            consumerBody.innerHTML = Object.entries(consumerStats).map(([id, data]) => {
+                if (data.count === 0) return "";
+                const avgCost = data.cost / data.count;
+                return `
+                    <tr>
+                        <td><strong>${data.name}</strong></td>
+                        <td>${data.count}</td>
+                        <td>In: ${data.prompt.toLocaleString()} / Out: ${data.completion.toLocaleString()}</td>
+                        <td class="tx-cost">$${data.cost.toFixed(5)}</td>
+                        <td>$${avgCost.toFixed(5)}</td>
+                    </tr>
+                `;
+            }).join("");
+            if (consumerBody.innerHTML === "") {
+                consumerBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted)">Realiza solicitudes para ver el desglose.</td></tr>`;
+            }
+        }
+        
+        const modelBody = document.getElementById("p1-model-body");
+        if (modelBody) {
+            modelBody.innerHTML = Object.entries(modelStats).map(([model, data]) => {
+                let badgeClass = "llama";
+                if (model.includes("mistral")) badgeClass = "mistral";
+                else if (model.includes("groq") || model.includes("instant")) badgeClass = "groq";
+                
+                return `
+                    <tr>
+                        <td><span class="tx-badge ${badgeClass}">${model}</span></td>
+                        <td>${data.count}</td>
+                        <td>In: ${data.prompt.toLocaleString()} / Out: ${data.completion.toLocaleString()}</td>
+                        <td class="tx-cost">$${data.cost.toFixed(5)}</td>
+                    </tr>
+                `;
+            }).join("");
+        }
+    }
+</script>
+{% endblock %}

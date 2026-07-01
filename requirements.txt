@@ -1,3 +1,7 @@
 Flask
 httpx
 pandas
+gower
+scikit-learn
+numpy
+joblib

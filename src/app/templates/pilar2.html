@@ -1,0 +1,467 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Panel Izquierdo: Gobernanza y Alertas -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- Configuración de Límites (Gobernanza) -->
+        <div class="glass-card">
+            <div class="card-title">Configuración de Gobernanza y Umbrales</div>
+            <div class="form-group">
+                <label for="config-consumer">Rol / Equipo</label>
+                <select id="config-consumer" onchange="loadConfigForm()">
+                    <option value="marketing">Marketing</option>
+                    <option value="desarrollo">Desarrollo</option>
+                    <option value="rrhh">RRHH</option>
+                </select>
+            </div>
+            <div class="config-grid">
+                <div class="form-group">
+                    <label for="config-limit">Límite Presupuestal ($)</label>
+                    <input type="number" id="config-limit" step="0.5" min="0.1" value="5.0">
+                </div>
+                <div class="form-group">
+                    <label for="config-threshold">Umbral de Alerta (%)</label>
+                    <input type="number" id="config-threshold" step="5" min="10" max="100" value="80">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" style="flex-grow:1;" onclick="saveConfig()">Actualizar Reglas</button>
+                <button class="btn btn-secondary btn-danger" onclick="resetDb()" title="Reiniciar base de datos de transacciones">Reset</button>
+            </div>
+        </div>
+
+        <!-- Alertas FinOps Activas -->
+        <div class="glass-card">
+            <div class="card-title">
+                Alertas Activas
+                <span class="badge" id="alert-count">0</span>
+            </div>
+            <div class="alert-panel" id="alert-panel">
+                <div class="alert-empty">No hay alertas activas en este periodo.</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Panel Derecho: Gráficas de Consumo y ARIMA Forecast -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- Gráfico 1: Consumo por Departamento -->
+        <div class="glass-card">
+            <div class="card-title">
+                Distribución de Consumo por Departamento
+                <span class="badge" style="background:var(--accent-success-glow); color:#34d399;">Cuota de Gasto</span>
+            </div>
+            <div style="background: rgba(10, 15, 30, 0.5); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); min-height: 220px; display: flex; align-items: center; justify-content: center; position: relative;">
+                <canvas id="deptChart" style="max-height: 180px; width: 100%;"></canvas>
+                <div id="dept-chart-empty" style="display:none; color:var(--text-muted); font-size:0.9rem; text-align:center;">No hay transacciones registradas para calcular distribución de gasto.</div>
+            </div>
+        </div>
+
+        <!-- Gráfico 2: Previsión ARIMA -->
+        <div class="glass-card" style="flex-grow: 1;">
+            <div class="card-title">
+                Previsión ARIMA de Gasto Futuro
+                <span class="badge" style="background:var(--accent-primary-glow); color:#c084fc;" id="forecast-model-name">ARIMA(1,1,0)</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                <div class="form-group" style="width: 250px;">
+                    <label for="select-forecast-role">Filtrar Proyección por Rol</label>
+                    <select id="select-forecast-role" onchange="updateForecastChart()">
+                        <option value="todos">Todos los Roles (Consolidado)</option>
+                        <option value="marketing">Marketing</option>
+                        <option value="desarrollo">Desarrollo</option>
+                        <option value="rrhh">RRHH</option>
+                    </select>
+                </div>
+                <div id="forecast-status-badge" style="margin-top: 1rem;"></div>
+            </div>
+
+            <!-- Canvas para el gráfico de predicción -->
+            <div style="background: rgba(10, 15, 30, 0.5); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color); min-height: 280px; position: relative;">
+                <canvas id="forecastChart" style="max-height: 300px; width: 100%;"></canvas>
+            </div>
+
+            <!-- Análisis Predictivo -->
+            <div class="output-meta" id="forecast-meta" style="flex-direction: column; gap: 0.75rem; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Gasto Acumulado Actual:</span>
+                    <strong style="color:#fff;" id="p2-burn-rate">$0.00000</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Previsión de Alerta (Próximos 7 periodos):</span>
+                    <strong id="p2-days-left" style="color:var(--accent-success);">Seguro (sin riesgo)</strong>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem; margin-top: 0.25rem;">
+                    La predicción utiliza un modelo <strong>ARIMA(1,1,0)</strong> (Autoregresivo Integrado de Media Móvil) entrenado sobre los consumos incrementales acumulados del historial, extrapolando el límite presupuestario.
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let forecastChart = null;
+    let deptChart = null;
+
+    function initPageSpecific() {
+        setTimeout(loadConfigForm, 500); // Allow state to load first
+    }
+
+    function renderBudgets() {
+        // Required as callback in base.html refreshState
+    }
+
+    function renderAlerts() {
+        const countBadge = document.getElementById("alert-count");
+        const panel = document.getElementById("alert-panel");
+        if (!panel) return;
+        
+        countBadge.innerText = state.alerts.length;
+        
+        if (state.alerts.length === 0) {
+            panel.innerHTML = `<div class="alert-empty">No hay alertas activas en este periodo.</div>`;
+            return;
+        }
+        
+        panel.innerHTML = state.alerts.map(alert => {
+            const severity = alert.severity || 'warning';
+            return `
+                <div class="alert-item ${severity}">
+                    <span>${severity === 'danger' ? '🚨' : '⚠️'}</span>
+                    <div>
+                        <div style="font-weight:600; font-size:0.85rem; color:var(--text-muted)">${alert.timestamp}</div>
+                        <div>${alert.message}</div>
+                    </div>
+                </div>
+            `;
+        }).reverse().join("");
+    }
+
+    function renderRecommendations() {
+        // Not used on this page
+    }
+
+    function loadConfigForm() {
+        const id = document.getElementById("config-consumer").value.toLowerCase();
+        const consumer = state.consumers[id];
+        if (!consumer) return;
+        
+        document.getElementById("config-limit").value = consumer.budget_limit;
+        document.getElementById("config-threshold").value = Math.round(consumer.alert_threshold * 100);
+    }
+
+    async function saveConfig() {
+        const id = document.getElementById("config-consumer").value.toLowerCase();
+        const limit = parseFloat(document.getElementById("config-limit").value);
+        const threshold = parseFloat(document.getElementById("config-threshold").value) / 100;
+        
+        try {
+            const res = await fetch("/api/finops/config", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    [id]: {
+                        budget_limit: limit,
+                        alert_threshold: threshold
+                    }
+                })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                state = data.state;
+                renderAlerts();
+                loadConfigForm();
+                updateForecastChart();
+                alert("Gobernanza de presupuesto actualizada.");
+            }
+        } catch (e) {
+            alert("Error al actualizar la configuración: " + e);
+        }
+    }
+
+    async function resetDb() {
+        if (!confirm("¿Estás seguro de que quieres borrar el historial de transacciones y restablecer los gastos?")) return;
+        try {
+            const res = await fetch("/api/finops/reset", { method: "POST" });
+            if (res.ok) {
+                const data = await res.json();
+                state = data.state;
+                renderAlerts();
+                updateForecastChart();
+            }
+        } catch (e) {
+            alert("Error al restablecer la base de datos: " + e);
+        }
+    }
+
+    function updatePilar1Stats() {
+        updateForecastChart();
+    }
+
+    async function updateForecastChart() {
+        const selectedRole = document.getElementById("select-forecast-role").value;
+        const txs = state.transactions;
+        
+        // 1. Render Department spent chart (Doughnut)
+        renderDeptChart();
+        
+        // 2. Fetch ARIMA forecast from backend
+        let forecastData = {
+            history_timestamps: [],
+            history_cumulative: [],
+            forecast_timestamps: [],
+            forecast_cumulative: [],
+            bin_unit: "minute",
+            model_used: "none"
+        };
+        try {
+            const res = await fetch(`/api/finops/forecast?role=${selectedRole}`);
+            if (res.ok) {
+                forecastData = await res.json();
+            }
+        } catch (e) {
+            console.error("Error fetching forecast:", e);
+        }
+        
+        // 3. Fetch limit for current selection
+        let limit = 0;
+        let spent = 0;
+        if (selectedRole === "todos") {
+            for (const consumer of Object.values(state.consumers)) {
+                limit += consumer.budget_limit;
+                spent += consumer.spent;
+            }
+        } else {
+            const consumer = state.consumers[selectedRole];
+            if (consumer) {
+                limit = consumer.budget_limit;
+                spent = consumer.spent;
+            }
+        }
+        
+        const historyCum = forecastData.history_cumulative || [];
+        const forecastCum = forecastData.forecast_cumulative || [];
+        const histLen = historyCum.length;
+        const foreLen = forecastCum.length;
+        
+        if (histLen === 0) {
+            return;
+        }
+        
+        // Construct combined lists for Chart.js
+        const combinedLabels = [];
+        const historyDataset = [];
+        const forecastDataset = [];
+        const limitDataset = [];
+        
+        // Combine history timestamps & values
+        for (let i = 0; i < histLen; i++) {
+            const label = forecastData.history_timestamps[i];
+            const d = new Date(label);
+            const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
+            combinedLabels.push(forecastData.bin_unit === 'day' ? d.toLocaleDateString() : timeStr);
+            historyDataset.push(historyCum[i]);
+            forecastDataset.push(null);
+            limitDataset.push(limit);
+        }
+        
+        // Connect history line to forecast line
+        if (histLen > 0 && foreLen > 0) {
+            forecastDataset[histLen - 1] = historyCum[histLen - 1];
+        }
+        
+        // Combine forecast timestamps & values
+        for (let i = 0; i < foreLen; i++) {
+            const label = forecastData.forecast_timestamps[i];
+            const d = new Date(label);
+            const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
+            combinedLabels.push(forecastData.bin_unit === 'day' ? d.toLocaleDateString() : timeStr);
+            forecastDataset.push(forecastCum[i]);
+            historyDataset.push(null);
+            limitDataset.push(limit);
+        }
+        
+        // Update Metadata info
+        document.getElementById("p2-burn-rate").innerText = `$${spent.toFixed(5)}`;
+        
+        // Calculate days left using the forecast data trend
+        const daysLeftBadge = document.getElementById("p2-days-left");
+        const statusBadge = document.getElementById("forecast-status-badge");
+        
+        // Indicate model used
+        document.getElementById("forecast-model-name").innerText = `Forecast: ${forecastData.model_used || "ARIMA(1,1,0)"}`;
+        
+        if (spent <= 0) {
+            daysLeftBadge.innerText = "Estable (Sin consumo)";
+            daysLeftBadge.style.color = "var(--accent-success)";
+            statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3)">Estable</span>`;
+        } else {
+            const lastForecastVal = forecastCum[foreLen - 1] || spent;
+            if (spent >= limit) {
+                daysLeftBadge.innerText = "Presupuesto ya Excedido";
+                daysLeftBadge.style.color = "var(--accent-danger)";
+                statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3)">¡Presupuesto Agotado!</span>`;
+            } else if (lastForecastVal >= limit) {
+                let crossIdx = -1;
+                for (let i = 0; i < foreLen; i++) {
+                    if (forecastCum[i] >= limit) {
+                        crossIdx = i;
+                        break;
+                    }
+                }
+                const crossPeriods = crossIdx + 1;
+                daysLeftBadge.innerText = `¡Alerta! Límite excedido en ${crossPeriods} periodos (${forecastData.bin_unit}s)`;
+                daysLeftBadge.style.color = "var(--accent-danger)";
+                statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3)">Riesgo Alto</span>`;
+            } else {
+                daysLeftBadge.innerText = `Seguro (sin riesgo en los próximos 7 periodos)`;
+                daysLeftBadge.style.color = "var(--accent-success)";
+                statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3)">Seguro</span>`;
+            }
+        }
+        
+        // Draw/Update Chart
+        const ctx = document.getElementById("forecastChart").getContext("2d");
+        
+        if (forecastChart) {
+            forecastChart.destroy();
+        }
+        
+        forecastChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: combinedLabels,
+                datasets: [
+                    {
+                        label: "Histórico Acumulado",
+                        data: historyDataset,
+                        borderColor: "rgba(139, 92, 246, 1)",
+                        backgroundColor: "rgba(139, 92, 246, 0.1)",
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: "rgba(139, 92, 246, 1)",
+                        fill: true
+                    },
+                    {
+                        label: `Previsión ARIMA`,
+                        data: forecastDataset,
+                        borderColor: "rgba(167, 139, 250, 0.8)",
+                        borderDash: [6, 4],
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        pointBackgroundColor: "rgba(167, 139, 250, 1)",
+                        fill: false
+                    },
+                    {
+                        label: "Límite de Presupuesto",
+                        data: limitDataset,
+                        borderColor: "rgba(239, 68, 68, 0.8)",
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false,
+                        borderDash: [3, 3]
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: "#9ca3af",
+                            font: { family: "'Outfit', sans-serif" }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: "rgba(255, 255, 255, 0.05)" },
+                        ticks: { color: "#9ca3af" }
+                    },
+                    y: {
+                        grid: { color: "rgba(255, 255, 255, 0.05)" },
+                        ticks: { 
+                            color: "#9ca3af",
+                            callback: function(value) { return "$" + value.toFixed(5); }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderDeptChart() {
+        const mktSpent = state.consumers.marketing?.spent || 0.0;
+        const devSpent = state.consumers.desarrollo?.spent || 0.0;
+        const rrhhSpent = state.consumers.rrhh?.spent || 0.0;
+        
+        const total = mktSpent + devSpent + rrhhSpent;
+        const canvas = document.getElementById("deptChart");
+        const emptyDiv = document.getElementById("dept-chart-empty");
+        
+        if (total === 0) {
+            canvas.style.display = "none";
+            emptyDiv.style.display = "block";
+            return;
+        }
+        
+        canvas.style.display = "block";
+        emptyDiv.style.display = "none";
+        
+        const ctx = canvas.getContext("2d");
+        
+        if (deptChart) {
+            deptChart.destroy();
+        }
+        
+        deptChart = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+                labels: ["Marketing (Ana)", "Desarrollo (Carlos)", "RRHH (Paco)"],
+                datasets: [{
+                    data: [mktSpent, devSpent, rrhhSpent],
+                    backgroundColor: [
+                        "rgba(139, 92, 246, 0.7)", // marketing (purple)
+                        "rgba(245, 158, 11, 0.7)",  // desarrollo (orange)
+                        "rgba(16, 185, 129, 0.7)"   // rrhh (green)
+                    ],
+                    borderColor: [
+                        "rgba(139, 92, 246, 1)",
+                        "rgba(245, 158, 11, 1)",
+                        "rgba(16, 185, 129, 1)"
+                    ],
+                    borderWidth: 1.5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "right",
+                        labels: {
+                            color: "#9ca3af",
+                            font: { family: "'Outfit', sans-serif", size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const val = context.raw;
+                                const pct = (val / total * 100).toFixed(1);
+                                return `${context.label}: $${val.toFixed(5)} (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

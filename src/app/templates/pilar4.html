@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-grid" style="grid-template-columns: 1.1fr 0.9fr; gap: 2rem;">
+    
+    <!-- Panel Izquierdo: Ficha y Flujo de Arquitectura -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- Ficha Técnica -->
+        <div class="glass-card">
+            <div class="card-title">
+                Ficha Técnica del Proyecto
+                <span class="badge" style="background:var(--accent-success-glow); color:#34d399;">Mercedes Hackathon</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem;">
+                <p><strong>Nombre del Proyecto:</strong> AI FinOps Gateway - Portal de Enrutamiento Optimizado y Gobernanza de Costes de Modelos LLM.</p>
+                <p><strong>Objetivo Principal:</strong> Interceptar y optimizar en tiempo real el consumo de modelos de lenguaje grandes (LLMs) en la empresa, aplicando límites de presupuesto dinámicos y enrutamiento inteligente mediante Machine Learning.</p>
+                <p><strong>Logros clave alcanzados:</strong></p>
+                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+                    <li><strong style="color:#fff;">Pilar 1 (Visibilidad):</strong> Desglose preciso de consumo por modelo y departamento con tarifas oficiales de tokens.</li>
+                    <li><strong style="color:#fff;">Pilar 2 (Gobernanza):</strong> Bloqueo de peticiones por superación de presupuesto y predicción ARIMA de gasto.</li>
+                    <li><strong style="color:#fff;">Pilar 3 (Inteligencia):</strong> Clasificador KNN con distancia de Gower para enrutar según el prompt.</li>
+                    <li><strong style="color:#fff;">Pilar 4 (Demo y Doc):</strong> Dashboard web unificado e interactivo y scripts de automatización.</li>
+                </ul>
+            </div>
+        </div>
+
+
+        <!-- Arquitectura, Diseño Agnóstico y Seguridad -->
+        <div class="glass-card">
+            <div class="card-title">
+                Principios de Diseño y Arquitectura
+                <span class="badge" style="background:var(--accent-primary-glow); color:#c084fc;">Evaluación Jurado</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 1rem; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+                <div>
+                    <h4 style="color:#fff; font-size:0.95rem; margin-bottom:0.25rem;">🌐 Diseño Agnóstico a Proveedores</h4>
+                    <p>El gateway funciona de forma uniforme con proveedores locales (<strong>Ollama</strong>: <code>llama3.2:3b</code> y <code>mistral:7b</code>) y proveedores Cloud (<strong>Groq API</strong>: <code>llama-3.1-8b-instant</code>), utilizando la especificación de API compatible con OpenAI (<code>/v1/chat/completions</code>). Esto permite conectar instantáneamente servicios alternativos como OpenAI o Anthropic simplemente modificando las variables de entorno de endpoints en el servidor.</p>
+                </div>
+                <div>
+                    <h4 style="color:#fff; font-size:0.95rem; margin-bottom:0.25rem;">🛠️ Separación de Responsabilidades</h4>
+                    <ul style="padding-left:1.25rem; display:flex; flex-direction:column; gap:0.25rem;">
+                        <li><strong>Proxy / Routing (Lógica de Tránsito):</strong> <a href="file:///home/mipc/Escritorio/universidad/hackaton%20mercedes/src/app/proxy.py">proxy.py</a> y <a href="file:///home/mipc/Escritorio/universidad/hackaton%20mercedes/src/app/utils/knn_routing.py">knn_routing.py</a> interceptan y clasifican peticiones sin acceder a almacenamiento persistente directamente.</li>
+                        <li><strong>Almacenamiento (Base de Datos):</strong> <a href="file:///home/mipc/Escritorio/universidad/hackaton%20mercedes/src/app/database.py">database.py</a> encapsula la persistencia física en SQLite de forma aislada.</li>
+                        <li><strong>Reporting / Interfaz (Capa de Presentación):</strong> Las vistas del portal visualizan costes, forecast y configuraciones comunicándose mediante endpoints REST seguros sin acceder a la base de datos directamente.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color:#fff; font-size:0.95rem; margin-bottom:0.25rem;">🔒 Seguridad: Claves de API Protegidas</h4>
+                    <p>Las claves de API de los proveedores (como <code>GROQ_API_KEY</code>) se configuran y guardan exclusivamente del lado del servidor (mediante variables de entorno en el contenedor Docker) y <strong>nunca se exponen a los clientes o consumidores de la API</strong>. Los clientes se identifican usando cabeceras de identidad de red (como <code>x-username</code>) y el gateway proxy se encarga de inyectar las credenciales correspondientes antes de redirigir la consulta al proveedor final.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ciclo de Vida de una Petición -->
+        <div class="glass-card">
+            <div class="card-title">Diagrama de Flujo del Gateway</div>
+            <div style="display: flex; flex-direction: column; gap: 1rem; position: relative; padding-left: 1rem; border-left: 2px solid var(--border-color); margin-left: 0.5rem; font-size: 0.88rem; color: var(--text-secondary);">
+                
+                <div style="position: relative;">
+                    <span style="position: absolute; left: -1.45rem; top: 0; background: var(--bg-color); border: 2px solid var(--accent-primary); width: 16px; height: 16px; border-radius: 50%;"></span>
+                    <strong style="color:#fff; display:block; margin-bottom:0.15rem;">1. Entrada del Prompt</strong>
+                    El usuario o script realiza una consulta (ej. al endpoint unificado <code>/api/v1/auto</code>).
+                </div>
+                
+                <div style="position: relative;">
+                    <span style="position: absolute; left: -1.45rem; top: 0; background: var(--bg-color); border: 2px solid var(--accent-primary); width: 16px; height: 16px; border-radius: 50%;"></span>
+                    <strong style="color:#fff; display:block; margin-bottom:0.15rem;">2. Clasificación KNN (AI Routing)</strong>
+                    El proxy extrae el departamento y estima los tokens. La distancia de Gower compara el prompt contra la matriz de entrenamiento y el clasificador KNN decide el mejor modelo.
+                </div>
+                
+                <div style="position: relative;">
+                    <span style="position: absolute; left: -1.45rem; top: 0; background: var(--bg-color); border: 2px solid var(--accent-primary); width: 16px; height: 16px; border-radius: 50%;"></span>
+                    <strong style="color:#fff; display:block; margin-bottom:0.15rem;">3. Control de Gobernanza (FinOps)</strong>
+                    Comprueba en SQLite si el departamento del emisor dispone de saldo presupuestal suficiente. Si excede, bloquea la llamada devolviendo un código <code>402 Payment Required</code>.
+                </div>
+                
+                <div style="position: relative;">
+                    <span style="position: absolute; left: -1.45rem; top: 0; background: var(--bg-color); border: 2px solid var(--accent-primary); width: 16px; height: 16px; border-radius: 50%;"></span>
+                    <strong style="color:#fff; display:block; margin-bottom:0.15rem;">4. Ejecución del Proxy (Streaming SSE)</strong>
+                    Redirige la consulta al proveedor elegido (Ollama local o Groq API). Soporta streaming en tiempo real usando Eventos de Servidor (Server-Sent Events).
+                </div>
+                
+                <div style="position: relative;">
+                    <span style="position: absolute; left: -1.45rem; top: 0; background: var(--bg-color); border: 2px solid var(--accent-primary); width: 16px; height: 16px; border-radius: 50%;"></span>
+                    <strong style="color:#fff; display:block; margin-bottom:0.15rem;">5. Registro de Auditoría y Costes</strong>
+                    Al completarse la respuesta, calcula el coste de tokens real consumidos, actualiza el saldo del departamento en SQLite y guarda los datos en el log persistente.
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Panel Derecho: Repositorio y Demostraciones -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- Estructura de Archivos Clave -->
+        <div class="glass-card">
+            <div class="card-title">Estructura del Proyecto</div>
+            <div class="table-wrapper" style="font-size: 0.82rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Módulo / Archivo</th>
+                            <th>Propósito en el Gateway</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>src/app/proxy.py</code></td>
+                            <td>Gestión de URLs de proveedores y enrutamiento streaming.</td>
+                        </tr>
+                        <tr>
+                            <td><code>src/app/database.py</code></td>
+                            <td>Acceso a base de datos SQLite y gestión de triggers.</td>
+                        </tr>
+                        <tr>
+                            <td><code>src/app/utils/forecast.py</code></td>
+                            <td>Algoritmo ARIMA e incremental de gasto predictivo.</td>
+                        </tr>
+                        <tr>
+                            <td><code>src/app/utils/knn_routing.py</code></td>
+                            <td>Motor de inferencia KNN y cálculo de distancia de Gower.</td>
+                        </tr>
+                        <tr>
+                            <td><code>testing/run_benchmarks.py</code></td>
+                            <td>Script de automatización para generar pruebas sintéticas.</td>
+                        </tr>
+                        <tr>
+                            <td><code>testing/kNN.ipynb</code></td>
+                            <td>Cuaderno Jupyter de entrenamiento y validación KNN.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Cómo Probar y Ejecutar -->
+        <div class="glass-card">
+            <div class="card-title">Guía de Pruebas Automatizadas</div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.75rem;">
+                <p>Para poblar la base de datos de transacciones de forma automática y simular tráfico FinOps, puedes lanzar el script de benchmarks:</p>
+                <div style="background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 6px; font-family: monospace; color: #34d399; font-size: 0.82rem; border: 1px solid var(--border-color); overflow-x: auto; white-space: nowrap;">
+                    python testing/run_benchmarks.py
+                </div>
+                <p>Este script realizará ráfagas de consultas a los diferentes proveedores utilizando identidades simuladas y completará el histórico del log de auditoría que alimenta el optimizador y los gráficos predictivos del dashboard.</p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function initPageSpecific() {
+        // No specific initialization needed
+    }
+
+    function renderBudgets() {
+        // Callback support for base.html
+    }
+
+    function renderAlerts() {
+        // Callback support for base.html
+    }
+
+    function renderRecommendations() {
+        // Callback support for base.html
+    }
+
+    function updatePilar1Stats() {
+        // Callback support for base.html
+    }
+</script>
+{% endblock %}
