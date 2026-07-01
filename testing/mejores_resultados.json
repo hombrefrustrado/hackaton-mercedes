@@ -5,12 +5,10 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.2158544063568115,
     "prompt_tokens": 80,
-    "query_scores": {
-      "concretitud": 0.0,
-      "especificacion": 4.32,
-      "criticidad": 0.0,
-      "tamano_respuesta": 8.03
-    }
+    "concretitud": 0.0,
+    "especificacion": 4.32,
+    "criticidad": 0.0,
+    "tamano_respuesta": 8.03
   },
   {
     "departamento": "marketing",
@@ -18,12 +16,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 0.9417352676391602,
     "prompt_tokens": 79,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.3,
       "criticidad": 0.0,
       "tamano_respuesta": 10.0
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -31,12 +28,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.217726469039917,
     "prompt_tokens": 73,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.06,
       "criticidad": 0.0,
       "tamano_respuesta": 10.0
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -44,12 +40,11 @@
     "model": "llama3.2:3b",
     "latency_s": 3.0833613872528076,
     "prompt_tokens": 65,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 1.5,
       "criticidad": 0.0,
       "tamano_respuesta": 5.0
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -57,12 +52,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.365051031112671,
     "prompt_tokens": 75,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.12,
       "criticidad": 0.0,
       "tamano_respuesta": 2.7
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -70,12 +64,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.0269749164581299,
     "prompt_tokens": 76,
-    "query_scores": {
       "concretitud": 2.5,
       "especificacion": 1.68,
       "criticidad": 0.0,
       "tamano_respuesta": 10.0
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -83,12 +76,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.7699971199035645,
     "prompt_tokens": 65,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.06,
       "criticidad": 0.0,
       "tamano_respuesta": 2.6
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -96,12 +88,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.1195168495178223,
     "prompt_tokens": 147,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 2.56,
       "criticidad": 0.0,
       "tamano_respuesta": 10.0
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -109,12 +100,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.0285954475402832,
     "prompt_tokens": 119,
-    "query_scores": {
       "concretitud": 5.0,
       "especificacion": 7.02,
       "criticidad": 0.0,
       "tamano_respuesta": 3.36
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -122,12 +112,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.1725659370422363,
     "prompt_tokens": 77,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.12,
       "criticidad": 0.0,
       "tamano_respuesta": 7.7
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -135,12 +124,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.3903350830078125,
     "prompt_tokens": 66,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 6.62,
       "criticidad": 0.0,
       "tamano_respuesta": 2.7
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -148,12 +136,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.7364180088043213,
     "prompt_tokens": 64,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.0,
       "criticidad": 0.0,
       "tamano_respuesta": 2.5
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -161,12 +148,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.494178056716919,
     "prompt_tokens": 79,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 1.68,
       "criticidad": 0.0,
       "tamano_respuesta": 5.3
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -174,12 +160,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.2401349544525146,
     "prompt_tokens": 73,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 3.94,
       "criticidad": 0.0,
       "tamano_respuesta": 7.4
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -187,12 +172,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.4068603515625,
     "prompt_tokens": 62,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 3.94,
       "criticidad": 0.0,
       "tamano_respuesta": 2.4
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -200,12 +184,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.455118417739868,
     "prompt_tokens": 62,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 1.5,
       "criticidad": 0.0,
       "tamano_respuesta": 5.0
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -213,12 +196,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.9780457019805908,
     "prompt_tokens": 86,
-    "query_scores": {
       "concretitud": 2.5,
       "especificacion": 4.32,
       "criticidad": 0.0,
       "tamano_respuesta": 5.53
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -226,12 +208,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.659884452819824,
     "prompt_tokens": 43,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 3.16,
       "criticidad": 0.0,
       "tamano_respuesta": 1.1
-    }
+    
   },
   {
     "departamento": "marketing",
@@ -239,12 +220,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 0.9343273639678955,
     "prompt_tokens": 137,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 7.41,
       "criticidad": 0.0,
       "tamano_respuesta": 4.02
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -252,12 +232,11 @@
     "model": "mistral:7b",
     "latency_s": 4.8326945304870605,
     "prompt_tokens": 54,
-    "query_scores": {
       "concretitud": 2.5,
       "especificacion": 6.44,
       "criticidad": 2.5,
       "tamano_respuesta": 2.4
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -265,12 +244,11 @@
     "model": "llama3.2:3b",
     "latency_s": 3.0555765628814697,
     "prompt_tokens": 50,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 3.46,
       "criticidad": 0.0,
       "tamano_respuesta": 1.6
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -278,12 +256,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.8937888145446777,
     "prompt_tokens": 56,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 8.88,
       "criticidad": 0.0,
       "tamano_respuesta": 2.3
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -291,12 +268,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.0114424228668213,
     "prompt_tokens": 74,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 3.94,
       "criticidad": 2.5,
       "tamano_respuesta": 4.9
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -304,12 +280,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.079296350479126,
     "prompt_tokens": 80,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 9.3,
       "criticidad": 0.0,
       "tamano_respuesta": 5.5
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -317,12 +292,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.492002487182617,
     "prompt_tokens": 60,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 6.5,
       "criticidad": 0.0,
       "tamano_respuesta": 2.5
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -330,12 +304,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.0045342445373535,
     "prompt_tokens": 81,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 9.37,
       "criticidad": 0.0,
       "tamano_respuesta": 5.62
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -343,12 +316,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.1786766052246094,
     "prompt_tokens": 72,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 10.0,
       "criticidad": 0.0,
       "tamano_respuesta": 5.2
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -356,12 +328,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.1455986499786377,
     "prompt_tokens": 92,
-    "query_scores": {
       "concretitud": 2.5,
       "especificacion": 10.0,
       "criticidad": 0.0,
       "tamano_respuesta": 3.24
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -369,12 +340,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.109407663345337,
     "prompt_tokens": 63,
-    "query_scores": {
       "concretitud": 5.0,
       "especificacion": 3.58,
       "criticidad": 0.0,
       "tamano_respuesta": 4.3
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -382,12 +352,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.8367867469787598,
     "prompt_tokens": 55,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 3.82,
       "criticidad": 2.5,
       "tamano_respuesta": 2.2
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -395,12 +364,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.9422390460968018,
     "prompt_tokens": 60,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 3.76,
       "criticidad": 0.0,
       "tamano_respuesta": 2.1
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -408,12 +376,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.80415678024292,
     "prompt_tokens": 56,
-    "query_scores": {
       "concretitud": 2.5,
       "especificacion": 6.44,
       "criticidad": 0.0,
       "tamano_respuesta": 2.4
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -421,12 +388,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.2006235122680664,
     "prompt_tokens": 70,
-    "query_scores": {
       "concretitud": 5.0,
       "especificacion": 8.82,
       "criticidad": 0.0,
       "tamano_respuesta": 2.2
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -434,12 +400,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.083036184310913,
     "prompt_tokens": 62,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 3.82,
       "criticidad": 2.5,
       "tamano_respuesta": 4.7
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -447,12 +412,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.0467851161956787,
     "prompt_tokens": 69,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 10.0,
       "criticidad": 0.0,
       "tamano_respuesta": 4.9
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -460,12 +424,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.9154646396636963,
     "prompt_tokens": 57,
-    "query_scores": {
       "concretitud": 2.5,
       "especificacion": 3.94,
       "criticidad": 0.0,
       "tamano_respuesta": 2.4
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -473,12 +436,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.930920124053955,
     "prompt_tokens": 67,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.06,
       "criticidad": 0.0,
       "tamano_respuesta": 2.6
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -486,12 +448,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.1519041061401367,
     "prompt_tokens": 101,
-    "query_scores": {
       "concretitud": 5.0,
       "especificacion": 4.55,
       "criticidad": 0.0,
       "tamano_respuesta": 3.42
-    }
+    
   },
   {
     "departamento": "desarrollo",
@@ -499,12 +460,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.1084136962890625,
     "prompt_tokens": 86,
-    "query_scores": {
       "concretitud": 5.0,
       "especificacion": 6.84,
       "criticidad": 0.0,
       "tamano_respuesta": 8.06
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -512,12 +472,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.6849825382232666,
     "prompt_tokens": 40,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 0.6,
       "criticidad": 0.0,
       "tamano_respuesta": 1.0
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -525,12 +484,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.6665523052215576,
     "prompt_tokens": 31,
-    "query_scores": {
       "concretitud": 2.5,
       "especificacion": 0.18,
       "criticidad": 0.0,
       "tamano_respuesta": 0.3
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -538,12 +496,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.9666481018066406,
     "prompt_tokens": 63,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 1.56,
       "criticidad": 0.0,
       "tamano_respuesta": 2.6
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -551,12 +508,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.1343903541564941,
     "prompt_tokens": 100,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.44,
       "criticidad": 0.0,
       "tamano_respuesta": 5.74
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -564,12 +520,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.0826294422149658,
     "prompt_tokens": 70,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.06,
       "criticidad": 0.0,
       "tamano_respuesta": 5.1
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -577,12 +532,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.2278401851654053,
     "prompt_tokens": 116,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.66,
       "criticidad": 5.0,
       "tamano_respuesta": 8.6
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -590,12 +544,11 @@
     "model": "mistral:7b",
     "latency_s": 4.706854343414307,
     "prompt_tokens": 46,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 1.44,
       "criticidad": 5.0,
       "tamano_respuesta": 2.4
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -603,12 +556,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.5370280742645264,
     "prompt_tokens": 96,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.5,
       "criticidad": 0.0,
       "tamano_respuesta": 3.33
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -616,12 +568,11 @@
     "model": "mistral:7b",
     "latency_s": 4.709077835083008,
     "prompt_tokens": 141,
-    "query_scores": {
       "concretitud": 2.5,
       "especificacion": 5.04,
       "criticidad": 10.0,
       "tamano_respuesta": 4.23
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -629,12 +580,11 @@
     "model": "llama3.2:3b",
     "latency_s": 3.111304998397827,
     "prompt_tokens": 65,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.0,
       "criticidad": 2.5,
       "tamano_respuesta": 2.5
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -642,12 +592,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.1797146797180176,
     "prompt_tokens": 121,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.66,
       "criticidad": 2.5,
       "tamano_respuesta": 3.6
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -655,12 +604,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.506769895553589,
     "prompt_tokens": 62,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 1.62,
       "criticidad": 0.0,
       "tamano_respuesta": 2.7
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -668,12 +616,11 @@
     "model": "mistral:7b",
     "latency_s": 4.767856597900391,
     "prompt_tokens": 83,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.62,
       "criticidad": 5.0,
       "tamano_respuesta": 6.04
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -681,12 +628,10 @@
     "model": "llama3.2:3b",
     "latency_s": 2.0441465377807617,
     "prompt_tokens": 48,
-    "query_scores": {
       "concretitud": 5.0,
       "especificacion": 0.84,
       "criticidad": 0.0,
       "tamano_respuesta": 1.4
-    }
   },
   {
     "departamento": "RRHH",
@@ -694,12 +639,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.889420986175537,
     "prompt_tokens": 58,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 1.32,
       "criticidad": 0.0,
       "tamano_respuesta": 4.7
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -707,12 +651,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.9239466190338135,
     "prompt_tokens": 55,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 3.58,
       "criticidad": 2.5,
       "tamano_respuesta": 1.8
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -720,12 +663,11 @@
     "model": "llama3.2:3b",
     "latency_s": 2.813920021057129,
     "prompt_tokens": 50,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 0.96,
       "criticidad": 0.0,
       "tamano_respuesta": 4.1
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -733,12 +675,11 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 1.126734733581543,
     "prompt_tokens": 140,
-    "query_scores": {
       "concretitud": 2.5,
       "especificacion": 4.98,
       "criticidad": 0.0,
       "tamano_respuesta": 6.64
-    }
+    
   },
   {
     "departamento": "RRHH",
@@ -746,12 +687,10 @@
     "model": "llama-3.1-8b-instant",
     "latency_s": 0.8887972831726074,
     "prompt_tokens": 63,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 4.52,
       "criticidad": 0.0,
       "tamano_respuesta": 5.86
-    }
   },
   {
     "departamento": "RRHH",
@@ -759,11 +698,10 @@
     "model": "llama3.2:3b",
     "latency_s": 2.8066365718841553,
     "prompt_tokens": 76,
-    "query_scores": {
       "concretitud": 0.0,
       "especificacion": 1.8,
       "criticidad": 0.0,
       "tamano_respuesta": 5.5
-    }
+    
   }
 ]

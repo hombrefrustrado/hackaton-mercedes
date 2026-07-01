@@ -712,6 +712,13 @@
     };
 
     // Initialize Page
+    function formatCost(val) {
+        if (val === 0) return "$0.0000000";
+        if (val < 0.01) return "$" + val.toFixed(7);
+        if (val < 0.1) return "$" + val.toFixed(6);
+        return "$" + val.toFixed(5);
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         if (typeof initPageSpecific === "function") {
             initPageSpecific();
@@ -776,6 +783,9 @@
             if (typeof updatePilar1Stats === "function") {
                 updatePilar1Stats();
             }
+            if (typeof renderUsers === "function") {
+                renderUsers();
+            }
         } catch (e) {
             console.error("Error refreshing state:", e);
         }
@@ -805,7 +815,7 @@
                     <td><span class="tx-badge ${badgeClass}">${tx.model}</span></td>
                     <td>In: ${tx.prompt_tokens} / Out: ${tx.completion_tokens}</td>
                     <td>${tx.latency_ms} ms</td>
-                    <td class="tx-cost">$${tx.cost.toFixed(5)}</td>
+                    <td class="tx-cost">${formatCost(tx.cost)}</td>
                     <td style="color:var(--text-muted)">${tx.stream ? 'Stream' : 'Standard'}</td>
                 </tr>
             `;

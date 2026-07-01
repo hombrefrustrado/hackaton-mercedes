@@ -91,10 +91,7 @@
                 <div class="form-group">
                     <label for="select-consumer">Nombre de Usuario (Consumidor)</label>
                     <select id="select-consumer">
-                        <option value="ana">Ana (Marketing)</option>
-                        <option value="carlos">Carlos (Desarrollo)</option>
-                        <option value="paco">Paco (RRHH)</option>
-                        <option value="default">Usuario Genérico</option>
+                        <!-- Loaded dynamically from database -->
                     </select>
                 </div>
             </div>
@@ -155,6 +152,28 @@
         }
     }
 
+    function renderUsers() {
+        const select = document.getElementById("select-consumer");
+        if (!select) return;
+        
+        const currentVal = select.value;
+        select.innerHTML = "";
+        
+        if (state.users && state.users.length > 0) {
+            state.users.forEach(user => {
+                const limitStr = user.budget_limit.toFixed(2);
+                const roleCapitalized = user.role_name.charAt(0).toUpperCase() + user.role_name.slice(1);
+                select.innerHTML += `
+                    <option value="${user.email}">${user.name} (${roleCapitalized} - Límite: $${limitStr})</option>
+                `;
+            });
+        }
+        
+        if (currentVal && select.querySelector(`option[value="${currentVal}"]`)) {
+            select.value = currentVal;
+        }
+    }
+
     function renderBudgets() {
         const container = document.getElementById("budget-container");
         if (!container) return;
@@ -176,7 +195,7 @@
                 <div class="budget-item">
                     <div class="budget-header">
                         <span class="budget-name">${consumer.name}</span>
-                        <span class="budget-spend">$${spent.toFixed(4)} / $${limit.toFixed(2)} (${pct.toFixed(1)}%)</span>
+                        <span class="budget-spend">${formatCost(spent)} / $${limit.toFixed(2)} (${pct.toFixed(1)}%)</span>
                     </div>
                     <div class="progress-container">
                         <div class="progress-bar ${colorClass}" style="width: ${pct}%"></div>
@@ -444,7 +463,7 @@
                 
                 document.getElementById("meta-tokens").innerText = `In: ${prompt_tokens} / Out: ${completion_tokens} (Total: ${total_tokens})`;
                 document.getElementById("meta-latency").innerText = `${Math.round(latency)} ms`;
-                document.getElementById("meta-cost").innerText = `$${cost.toFixed(5)}`;
+                document.getElementById("meta-cost").innerText = formatCost(cost);
                 
                 showSavingsBadge(model, prompt_tokens, completion_tokens);
                 metaContainer.style.display = "flex";
@@ -469,14 +488,14 @@
             const cheaperCost = ((prompt_tokens * 0.06) + (completion_tokens * 0.06)) / 1_000_000;
             const savings = currentCost - cheaperCost;
             if (savings > 0) {
-                savingSpan.innerText = `¡Ahorro potencial: $${savings.toFixed(5)} si usaras Llama 3.2!`;
+                savingSpan.innerText = `¡Ahorro potencial: ${formatCost(savings)} si usaras Llama 3.2!`;
             }
         } else if (currentModel === "llama-3.1-8b-instant") {
             const currentCost = ((prompt_tokens * 0.05) + (completion_tokens * 0.08)) / 1_000_000;
             const cheaperCost = ((prompt_tokens * 0.06) + (completion_tokens * 0.06)) / 1_000_000;
             const savings = currentCost - cheaperCost;
             if (savings > 0) {
-                savingSpan.innerText = `¡Ahorro potencial: $${savings.toFixed(5)} si usaras Llama 3.2 local!`;
+                savingSpan.innerText = `¡Ahorro potencial: ${formatCost(savings)} si usaras Llama 3.2 local!`;
             }
         }
     }
