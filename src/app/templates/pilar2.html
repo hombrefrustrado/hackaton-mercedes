@@ -45,13 +45,26 @@
 
     </div>
 
-    <!-- Panel Derecho: Gráfico de Predicción de Gasto -->
+    <!-- Panel Derecho: Gráficas de Consumo y ARIMA Forecast -->
     <div style="display: flex; flex-direction: column; gap: 2rem;">
         
+        <!-- Gráfico 1: Consumo por Departamento -->
+        <div class="glass-card">
+            <div class="card-title">
+                Distribución de Consumo por Departamento
+                <span class="badge" style="background:var(--accent-success-glow); color:#34d399;">Cuota de Gasto</span>
+            </div>
+            <div style="background: rgba(10, 15, 30, 0.5); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); min-height: 220px; display: flex; align-items: center; justify-content: center; position: relative;">
+                <canvas id="deptChart" style="max-height: 180px; width: 100%;"></canvas>
+                <div id="dept-chart-empty" style="display:none; color:var(--text-muted); font-size:0.9rem; text-align:center;">No hay transacciones registradas para calcular distribución de gasto.</div>
+            </div>
+        </div>
+
+        <!-- Gráfico 2: Previsión ARIMA -->
         <div class="glass-card" style="flex-grow: 1;">
             <div class="card-title">
-                Proyección y Predicción de Gasto (Próximos 7 días)
-                <span class="badge" style="background:var(--accent-primary-glow); color:#c084fc;">Forecast Inteligente</span>
+                Previsión ARIMA de Gasto Futuro
+                <span class="badge" style="background:var(--accent-primary-glow); color:#c084fc;" id="forecast-model-name">ARIMA(1,1,0)</span>
             </div>
             
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
@@ -75,18 +88,17 @@
             <!-- Análisis Predictivo -->
             <div class="output-meta" id="forecast-meta" style="flex-direction: column; gap: 0.75rem; padding: 1rem;">
                 <div style="display: flex; justify-content: space-between;">
-                    <span>Tasa de Gasto Diario (Burn Rate):</span>
-                    <strong style="color:#fff;" id="p2-burn-rate">$0.00000 / día</strong>
+                    <span>Gasto Acumulado Actual:</span>
+                    <strong style="color:#fff;" id="p2-burn-rate">$0.00000</strong>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
-                    <span>Días estimados hasta agotar presupuesto:</span>
+                    <span>Previsión de Alerta (Próximos 7 periodos):</span>
                     <strong id="p2-days-left" style="color:var(--accent-success);">Seguro (sin riesgo)</strong>
                 </div>
                 <div style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem; margin-top: 0.25rem;">
-                    La predicción analiza el consumo acumulado de hoy extrapolando linealmente la tendencia de consumo para los próximos 7 días laborales.
+                    La predicción utiliza un modelo <strong>ARIMA(1,1,0)</strong> (Autoregresivo Integrado de Media Móvil) entrenado sobre los consumos incrementales acumulados del historial, extrapolando el límite presupuestario.
                 </div>
             </div>
-
         </div>
 
     </div>
@@ -94,13 +106,14 @@
 
 <script>
     let forecastChart = null;
+    let deptChart = null;
 
     function initPageSpecific() {
         setTimeout(loadConfigForm, 500); // Allow state to load first
     }
 
     function renderBudgets() {
-        // Not used on this page, but required as callback in base.html refreshState
+        // Required as callback in base.html refreshState
     }
 
     function renderAlerts() {
@@ -187,19 +200,38 @@
     }
 
     function updatePilar1Stats() {
-        // Callback automatically executed when state refreshes
         updateForecastChart();
     }
 
-    function updateForecastChart() {
+    async function updateForecastChart() {
         const selectedRole = document.getElementById("select-forecast-role").value;
         const txs = state.transactions;
         
+        // 1. Render Department spent chart (Doughnut)
+        renderDeptChart();
+        
+        // 2. Fetch ARIMA forecast from backend
+        let forecastData = {
+            history_timestamps: [],
+            history_cumulative: [],
+            forecast_timestamps: [],
+            forecast_cumulative: [],
+            bin_unit: "minute",
+            model_used: "none"
+        };
+        try {
+            const res = await fetch(`/api/finops/forecast?role=${selectedRole}`);
+            if (res.ok) {
+                forecastData = await res.json();
+            }
+        } catch (e) {
+            console.error("Error fetching forecast:", e);
+        }
+        
+        // 3. Fetch limit for current selection
         let limit = 0;
         let spent = 0;
-        
         if (selectedRole === "todos") {
-            // Consolidate spent & limits
             for (const consumer of Object.values(state.consumers)) {
                 limit += consumer.budget_limit;
                 spent += consumer.spent;
@@ -212,55 +244,82 @@
             }
         }
         
-        // Compute Daily Burn Rate based on today's consumption
-        // (if they spent $X today, we assume daily spent is $X for baseline projection)
-        const dailyBurnRate = spent;
+        const historyCum = forecastData.history_cumulative || [];
+        const forecastCum = forecastData.forecast_cumulative || [];
+        const histLen = historyCum.length;
+        const foreLen = forecastCum.length;
         
-        document.getElementById("p2-burn-rate").innerText = `$${dailyBurnRate.toFixed(5)} / día`;
-        
-        // Extrapolate next 7 days
-        const labels = ["Hoy (Histórico)"];
-        const historyData = [spent];
-        const forecastData = [spent];
-        const limitData = [limit];
-        
-        const today = new Date();
-        for (let i = 1; i <= 7; i++) {
-            const nextDate = new Date(today);
-            nextDate.setDate(today.getDate() + i);
-            const dateStr = nextDate.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
-            labels.push(dateStr);
-            
-            const projectedSpent = spent + (i * dailyBurnRate);
-            forecastData.push(projectedSpent);
-            historyData.push(null); // No history for future days
-            limitData.push(limit);
+        if (histLen === 0) {
+            return;
         }
         
-        // Calculate exhaustion day
+        // Construct combined lists for Chart.js
+        const combinedLabels = [];
+        const historyDataset = [];
+        const forecastDataset = [];
+        const limitDataset = [];
+        
+        // Combine history timestamps & values
+        for (let i = 0; i < histLen; i++) {
+            const label = forecastData.history_timestamps[i];
+            const d = new Date(label);
+            const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
+            combinedLabels.push(forecastData.bin_unit === 'day' ? d.toLocaleDateString() : timeStr);
+            historyDataset.push(historyCum[i]);
+            forecastDataset.push(null);
+            limitDataset.push(limit);
+        }
+        
+        // Connect history line to forecast line
+        if (histLen > 0 && foreLen > 0) {
+            forecastDataset[histLen - 1] = historyCum[histLen - 1];
+        }
+        
+        // Combine forecast timestamps & values
+        for (let i = 0; i < foreLen; i++) {
+            const label = forecastData.forecast_timestamps[i];
+            const d = new Date(label);
+            const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
+            combinedLabels.push(forecastData.bin_unit === 'day' ? d.toLocaleDateString() : timeStr);
+            forecastDataset.push(forecastCum[i]);
+            historyDataset.push(null);
+            limitDataset.push(limit);
+        }
+        
+        // Update Metadata info
+        document.getElementById("p2-burn-rate").innerText = `$${spent.toFixed(5)}`;
+        
+        // Calculate days left using the forecast data trend
         const daysLeftBadge = document.getElementById("p2-days-left");
         const statusBadge = document.getElementById("forecast-status-badge");
         
-        if (dailyBurnRate <= 0) {
+        // Indicate model used
+        document.getElementById("forecast-model-name").innerText = `Forecast: ${forecastData.model_used || "ARIMA(1,1,0)"}`;
+        
+        if (spent <= 0) {
             daysLeftBadge.innerText = "Estable (Sin consumo)";
             daysLeftBadge.style.color = "var(--accent-success)";
             statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3)">Estable</span>`;
         } else {
-            const daysLeft = (limit - spent) / dailyBurnRate;
-            if (daysLeft < 0) {
+            const lastForecastVal = forecastCum[foreLen - 1] || spent;
+            if (spent >= limit) {
                 daysLeftBadge.innerText = "Presupuesto ya Excedido";
                 daysLeftBadge.style.color = "var(--accent-danger)";
                 statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3)">¡Presupuesto Agotado!</span>`;
-            } else if (daysLeft <= 7) {
-                daysLeftBadge.innerText = `¡Alerta! Exceso previsto en ${daysLeft.toFixed(1)} días`;
+            } else if (lastForecastVal >= limit) {
+                let crossIdx = -1;
+                for (let i = 0; i < foreLen; i++) {
+                    if (forecastCum[i] >= limit) {
+                        crossIdx = i;
+                        break;
+                    }
+                }
+                const crossPeriods = crossIdx + 1;
+                daysLeftBadge.innerText = `¡Alerta! Límite excedido en ${crossPeriods} periodos (${forecastData.bin_unit}s)`;
                 daysLeftBadge.style.color = "var(--accent-danger)";
                 statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3)">Riesgo Alto</span>`;
-            } else if (daysLeft <= 14) {
-                daysLeftBadge.innerText = `Moderado (Superará en ${daysLeft.toFixed(1)} días)`;
-                daysLeftBadge.style.color = "var(--accent-warning)";
-                statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3)">Riesgo Medio</span>`;
             } else {
-                daysLeftBadge.innerText = `Seguro (>15 días restantes)`;
+                daysLeftBadge.innerText = `Seguro (sin riesgo en los próximos 7 periodos)`;
                 daysLeftBadge.style.color = "var(--accent-success)";
                 statusBadge.innerHTML = `<span class="tx-badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3)">Seguro</span>`;
             }
@@ -276,21 +335,21 @@
         forecastChart = new Chart(ctx, {
             type: "line",
             data: {
-                labels: labels,
+                labels: combinedLabels,
                 datasets: [
                     {
                         label: "Histórico Acumulado",
-                        data: historyData,
+                        data: historyDataset,
                         borderColor: "rgba(139, 92, 246, 1)",
                         backgroundColor: "rgba(139, 92, 246, 0.1)",
                         borderWidth: 3,
-                        pointRadius: 5,
+                        pointRadius: 4,
                         pointBackgroundColor: "rgba(139, 92, 246, 1)",
                         fill: true
                     },
                     {
-                        label: "Proyección Predictiva",
-                        data: forecastData,
+                        label: `Previsión ARIMA`,
+                        data: forecastDataset,
                         borderColor: "rgba(167, 139, 250, 0.8)",
                         borderDash: [6, 4],
                         borderWidth: 2.5,
@@ -300,7 +359,7 @@
                     },
                     {
                         label: "Límite de Presupuesto",
-                        data: limitData,
+                        data: limitDataset,
                         borderColor: "rgba(239, 68, 68, 0.8)",
                         borderWidth: 2,
                         pointRadius: 0,
@@ -329,7 +388,75 @@
                         grid: { color: "rgba(255, 255, 255, 0.05)" },
                         ticks: { 
                             color: "#9ca3af",
-                            callback: function(value) { return "$" + value.toFixed(4); }
+                            callback: function(value) { return "$" + value.toFixed(5); }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderDeptChart() {
+        const mktSpent = state.consumers.marketing?.spent || 0.0;
+        const devSpent = state.consumers.desarrollo?.spent || 0.0;
+        const rrhhSpent = state.consumers.rrhh?.spent || 0.0;
+        
+        const total = mktSpent + devSpent + rrhhSpent;
+        const canvas = document.getElementById("deptChart");
+        const emptyDiv = document.getElementById("dept-chart-empty");
+        
+        if (total === 0) {
+            canvas.style.display = "none";
+            emptyDiv.style.display = "block";
+            return;
+        }
+        
+        canvas.style.display = "block";
+        emptyDiv.style.display = "none";
+        
+        const ctx = canvas.getContext("2d");
+        
+        if (deptChart) {
+            deptChart.destroy();
+        }
+        
+        deptChart = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+                labels: ["Marketing (Ana)", "Desarrollo (Carlos)", "RRHH (Paco)"],
+                datasets: [{
+                    data: [mktSpent, devSpent, rrhhSpent],
+                    backgroundColor: [
+                        "rgba(139, 92, 246, 0.7)", // marketing (purple)
+                        "rgba(245, 158, 11, 0.7)",  // desarrollo (orange)
+                        "rgba(16, 185, 129, 0.7)"   // rrhh (green)
+                    ],
+                    borderColor: [
+                        "rgba(139, 92, 246, 1)",
+                        "rgba(245, 158, 11, 1)",
+                        "rgba(16, 185, 129, 1)"
+                    ],
+                    borderWidth: 1.5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "right",
+                        labels: {
+                            color: "#9ca3af",
+                            font: { family: "'Outfit', sans-serif", size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const val = context.raw;
+                                const pct = (val / total * 100).toFixed(1);
+                                return `${context.label}: $${val.toFixed(5)} (${pct}%)`;
+                            }
                         }
                     }
                 }

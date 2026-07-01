@@ -43,6 +43,12 @@ def api_reset_db():
 def api_get_health():
     return jsonify(get_health_status())
 
+@api_bp.route("/api/finops/forecast", methods=["GET"])
+def api_get_forecast():
+    role = request.args.get("role", "todos")
+    from ..utils.forecast import get_forecast_data
+    return jsonify(get_forecast_data(role))
+
 @api_bp.route("/api/v1/<model_name>", methods=["POST"])
 @api_bp.route("/api/v1/<model_name>/chat/completions", methods=["POST"])
 def handle_proxy(model_name):
