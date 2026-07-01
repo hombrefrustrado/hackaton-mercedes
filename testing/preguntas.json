@@ -2,7 +2,83 @@
 
     {
         "departamento":"marketing",
-        "query":"como destruyo esa casa"
+        "query":"Redacta una secuencia de 5 correos electrónicos automatizados (funnel de ventas) para usuarios que acaban de registrarse en nuestra versión de prueba gratuita pero aún no han comprado el plan premium"
+    },
+    {
+        "departamento":"marketing",
+        "query":"Escribe el guion completo para un vídeo de YouTube de 8 minutos estructurado con una introducción que enganche, desarrollo en 4 puntos clave, y cierre invitando a probar nuestra API."
+    },
+    {
+        "departamento":"marketing",
+        "query":"Redacta una nota de prensa formal de 500 palabras anunciando que nuestra empresa ha cerrado una ronda de financiación para expandir soluciones de IA en Europa"
+    },
+    {
+        "departamento":"marketing",
+        "query":"Genera 10 ideas de ganchos (hooks) visuales y guiones cortos para videos de TikTok e Instagram Reels enfocados en captar la atención de desarrolladores backend"
+    },
+    {
+        "departamento":"marketing",
+        "query":"Crea 3 variaciones de copy publicitario para anuncios de Facebook e Instagram Ads utilizando el método AIDA (Atención, Interés, Deseo, Acción) dirigidos a directores de tecnología (CTOs)"
+    },
+    {
+        "departamento":"marketing",
+        "query":"Escribe un post detallado para LinkedIn analizando los resultados del último informe de Gartner sobre FinOps. El tono debe ser profesional, analítico y generar debate en los comentarios."
+    },
+    {
+        "departamento":"marketing",
+        "query":"Crea un calendario editorial para Twitter/X de una semana entera (7 tuits en total, uno por día) combinando consejos de productividad y memes sutiles sobre programación."
+    },
+    {
+        "departamento":"marketing",
+        "query":""
+    },
+    {
+        "departamento":"marketing",
+        "query":"Clasifica la siguiente lista de 30 palabras clave según su intención de búsqueda (Informativa, Transaccional o Comercial) y sugiéreme cuáles deberíamos atacar primero: 'comprar saas barato', 'qué es una base de datos relacional', 'desarrollo web malaga', 'precio de openai vs claude 2026'..."
+    },
+    {
+        "departamento":"marketing",
+        "query":"Escribe las etiquetas Meta Title (máximo 60 caracteres) y Meta Description (máximo 155 caracteres) optimizadas para SEO para las 5 páginas de destino principales de nuestra web."
+    },
+    {
+        "departamento":"marketing",
+        "query":"Propón 15 nombres creativos y eslóganes comerciales impactantes para un nuevo software que controla y audita el gasto que hacen los empleados en APIs de Inteligencia Artificial."
+    },
+    {
+        "departamento":"marketing",
+        "query":"Danos 5 ideas disruptivas de campañas de marketing de guerrilla o acciones B2B presenciales para llamar la atención en el próximo evento tecnológico de AWS."
+    },
+    {
+        "departamento":"marketing",
+        "query":"Queremos lanzar un nuevo lead magnet (imán de leads). ¿Qué tipo de recurso (Ebook, Plantilla Excel, Checklist, Minicurso por email) resultaría más atractivo para ingenieros de datos sénior?"
+    },
+    {
+        "departamento":"marketing",
+        "query":"Diseña una estrategia de gamificación para nuestra comunidad de Discord de manera que los usuarios consigan recompensas o merchandising por invitar a otros desarrolladores."
+    },
+    {
+        "departamento":"marketing",
+        "query":"Adapta esta campaña publicitaria pensada originalmente para el mercado de Estados Unidos para que resulte atractiva y culturalmente relevante para el mercado de México."
+    },
+    {
+        "departamento":"marketing",
+        "query":"Reescribe estos 5 titulares de banners web para que se ajusten estrictamente a las limitaciones de diseño de Google Ads (máximo 30 caracteres por título)."
+    },
+    {
+        "departamento":"marketing",
+        "query":"Ayúdame a redactar las respuestas para la sección de Preguntas Frecuentes (FAQ) de nuestra nueva web sobre cómo funciona el sistema de créditos y devoluciones si un usuario cancela su suscripción."
+    },
+    {
+        "departamento":"marketing",
+        "query":"Genera un slogan atractivo para nuestro nuevo producto (coche gama media)."
+    },
+    {
+        "departamento":"marketing",
+        "query":"Crea 3 variaciones de textos para anuncios de Instagram y Facebook Ads (incluyendo copia principal, titular y sugerencia de botón de llamada a la acción) promocionando nuestro nuevo SUV 100% eléctrico. El público objetivo son familias jóvenes de clase media-alta preocupadas por el medio ambiente y la tecnología. Utiliza un tono cercano y seguro, destacando la autonomía de la batería y el espacio interior."
+    },
+    {
+        "departamento":"marketing",
+        "query":"Escribe el guion técnico y creativo para un anuncio de vídeo de 30 segundos en YouTube para un coche deportivo de gama alta. Divide el guion en dos columnas: una para la 'Descripción Visual de la Escena' (planos, iluminación, movimiento del coche) y otra para el 'Audio / Voz en Off'. El concepto central debe evocar exclusividad, adrenalina y éxito, enfocado en un perfil de comprador de entre 35 y 50 años."
     },
     {
         "departamento":"desarrollo",
