@@ -4,6 +4,8 @@ import time
 import httpx
 import sys
 
+import analyzer
+
 # Pricing rates per token (price per 1,000,000 / 1,000,000)
 PRICING = {
     "llama3.2:3b": {"input": 0.06 / 1_000_000, "output": 0.06 / 1_000_000},
@@ -59,6 +61,9 @@ def run_benchmarks(limit_per_dept=None, max_tokens=15):
             continue
             
         user = DEPT_TO_USER.get(dept, "default")
+
+        # Analyze query complexity once per query (same for all models)
+        query_scores = analyzer.analyze_query(query_text)
         
         for model in models:
             current_run += 1
@@ -134,6 +139,8 @@ def run_benchmarks(limit_per_dept=None, max_tokens=15):
                 "departamento": dept,
                 "usuario": user,
                 "query": query_text,
+                "query_scores": query_scores,
+                "score_final": analyzer.compute_model_score(query_scores, model),
                 "model": model,
                 "status_code": status_code,
                 "latency_s": latency_s,
@@ -141,11 +148,14 @@ def run_benchmarks(limit_per_dept=None, max_tokens=15):
                 "completion_tokens": completion_tokens,
                 "total_tokens": total_tokens,
                 "cost": cost,
-                "response_preview": response_content[:200]
+                "response": response_content
             })
             
             # Short sleep between requests to avoid rate limits
             time.sleep(0.3)
+
+    # Post-process results to compute composite scores and normalizations
+    results = analyzer.normalize_and_score_results(results)
 
     # Save results to resultados.json
     output_file = os.path.join(os.path.dirname(__file__), "resultados.json")
@@ -173,7 +183,7 @@ def run_benchmarks(limit_per_dept=None, max_tokens=15):
 
 if __name__ == "__main__":
     limit = None
-    max_tok = 15
+    max_tok = 50
     
     if len(sys.argv) > 1:
         val = sys.argv[1]
