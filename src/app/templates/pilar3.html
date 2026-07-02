@@ -63,11 +63,17 @@
                 <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
                     <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem;">Próximos Pasos (optimicación a futuro)</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted);">
+                        En este momento, el análisis NLP de las querys solo funciona en español. Hemos realizado algunos tests y calculamos que traducir
+                        (nuestra prueba ha sido desde el inglés) para realizar el análisis. Lo dejamos pendiente para desarrollo futuro, por no añadir complejidad excesiva.
+
                         Ahora mismo tenemos dos factores limitantes en nuestro proxy, la cantidad de datos clasificados y el algoritmo que empleamos.
                         Si aumentamos el volumen de datos clasificados, utilizando nuestro método de clasificación completo (lanzar la query a los tres 
                         modelos, además de hacer el análisis de sentimiento), nuestro algoritmo se volverá más lento (un dato más es una distancia más que calcular, cada vez).
                         Nuestra aproximación actual, aunque buena, podría adaptarse mejor a una mayor cantidad de datos base utilizando el algoritmo ANNOY. 
-                        Es similar al KNN que usamos actualmente, pero se adapta mucho mejor a volúmenes de datos elevados.
+                        Es similar al KNN que usamos actualmente, pero se adapta mucho mejor a volúmenes de datos elevados. 
+                        
+                        También podría usarse una base de datos basada en grafos (cambia la búsqueda de datos a una basada en cercanía, lo que acelera 
+                        la implementación).
                     </p>
                 </div>
             </div>
@@ -156,7 +162,8 @@
                             impacto y urgencia temporal mediante términos como <code>urgente</code>,
                             <code>crítico</code>, <code>producción</code>, <code>vulnerabilidad</code>,
                             <code>incidente</code>, <code>brecha de seguridad</code>. Cada término suma al score de
-                            forma ponderada (doble peso para los más graves). Score resultante: 0–10.
+                            forma ponderada (doble peso para los más graves). Score resultante: 0–10. Esta variable, 
+                            cuando es alta, beneficia mucho el elegir Mystral. 
                         </p>
                     </div>
 
@@ -168,7 +175,7 @@
                             terminología técnica y de dominio: <code>código</code>, <code>sql</code>,
                             <code>docker</code>, <code>kubernetes</code>, <code>api</code>, <code>arquitectura</code>,
                             <code>configurar</code>, <code>depurar</code>. Solicitudes con alta especificación requieren
-                            un modelo con mayor capacidad de razonamiento.
+                            un modelo con mayor capacidad de razonamiento. Beneficia a Groq un score alto
                         </p>
                     </div>
 
