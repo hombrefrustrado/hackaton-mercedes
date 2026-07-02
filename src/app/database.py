@@ -160,7 +160,7 @@ def get_state():
         SELECT q.rowid as id, q.Fecha as timestamp, q.Usuario as user_id, 
                u.nombre as user_name, r.nombre as role_name, q.Modelo as model,
                q.Num_tokens_in as prompt_tokens, q.Num_tokens_out as completion_tokens,
-               q.latency_ms as latency_ms,
+               q.latency_ms as latency_ms, q.Consulta as query_text,
                (q.Num_tokens_in * m.cpt_in + q.Num_tokens_out * m.cpt_out) as cost
         FROM Query q
         JOIN Usuario u ON q.Usuario = u.Email
@@ -180,8 +180,10 @@ def get_state():
             "completion_tokens": r["completion_tokens"],
             "cost": r["cost"],
             "latency_ms": r["latency_ms"] if r["latency_ms"] is not None else 0,
+            "query_text": r["query_text"] if r["query_text"] is not None else "API Proxy Request",
             "stream": False        # No guardado en el esquema actual (mockeado para UI)
         })
+        
         
     # 3. Generar Alertas Dinámicas basadas en el presupuesto consumido actual
     alerts = []
@@ -273,7 +275,7 @@ def calculate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> fl
     rates = PRICING.get(model, {"input": 0.0, "output": 0.0})
     return (prompt_tokens * rates["input"] + completion_tokens * rates["output"]) / 1_000_000
 
-def record_transaction(user_id: str, model: str, prompt_tokens: int, completion_tokens: int, cost: float, latency: float, stream: bool = False):
+def record_transaction(user_id: str, model: str, prompt_tokens: int, completion_tokens: int, cost: float, latency: float, stream: bool = False, query_text: str = "API Proxy Request"):
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -291,7 +293,7 @@ def record_transaction(user_id: str, model: str, prompt_tokens: int, completion_
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     cursor.execute(
         "INSERT INTO Query (Usuario, Fecha, Consulta, Modelo, Num_tokens_out, Num_tokens_in, latency_ms) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (user_id, timestamp, "API Proxy Request", model, completion_tokens, prompt_tokens, int(latency))
+        (user_id, timestamp, query_text, model, completion_tokens, prompt_tokens, int(latency))
     )
         
     conn.commit()

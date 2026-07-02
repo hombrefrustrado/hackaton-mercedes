@@ -159,7 +159,15 @@ def handle_mock_stream(resolved_model: str, body: dict, consumer_id: str, start_
     latency = time.time() - start_time
     from .database import record_transaction, calculate_cost
     cost = calculate_cost(resolved_model, prompt_tokens, completion_tokens)
-    record_transaction(consumer_id, resolved_model, prompt_tokens, completion_tokens, cost, latency, stream=True)
+    
+    prompt = body.get("prompt_text", "")
+    is_auto = body.get("is_auto_routed", False)
+    query_data = {
+        "prompt": prompt[:200] + ("..." if len(prompt) > 200 else ""),
+        "routing": "Auto (KNN)" if is_auto else "Directo"
+    }
+    query_text = json.dumps(query_data)
+    record_transaction(consumer_id, resolved_model, prompt_tokens, completion_tokens, cost, latency, stream=True, query_text=query_text)
 
 def handle_mock_non_stream(resolved_model: str, body: dict, consumer_id: str, start_time: float):
     responses = {
@@ -207,7 +215,15 @@ def handle_mock_non_stream(resolved_model: str, body: dict, consumer_id: str, st
     latency = time.time() - start_time
     from .database import record_transaction, calculate_cost
     cost = calculate_cost(resolved_model, prompt_tokens, completion_tokens)
-    record_transaction(consumer_id, resolved_model, prompt_tokens, completion_tokens, cost, latency, stream=False)
+    
+    prompt = body.get("prompt_text", "")
+    is_auto = body.get("is_auto_routed", False)
+    query_data = {
+        "prompt": prompt[:200] + ("..." if len(prompt) > 200 else ""),
+        "routing": "Auto (KNN)" if is_auto else "Directo"
+    }
+    query_text = json.dumps(query_data)
+    record_transaction(consumer_id, resolved_model, prompt_tokens, completion_tokens, cost, latency, stream=False, query_text=query_text)
     return resp_json
 
 def handle_live_stream(target_url: str, headers: dict, body: dict, consumer_id: str, resolved: str, start_time: float):
@@ -264,4 +280,12 @@ def handle_live_stream(target_url: str, headers: dict, body: dict, consumer_id: 
         
     from .database import record_transaction, calculate_cost
     cost = calculate_cost(resolved, prompt_tokens, completion_tokens)
-    record_transaction(consumer_id, resolved, prompt_tokens, completion_tokens, cost, latency, stream=True)
+    
+    prompt = body.get("prompt_text", "")
+    is_auto = body.get("is_auto_routed", False)
+    query_data = {
+        "prompt": prompt[:200] + ("..." if len(prompt) > 200 else ""),
+        "routing": "Auto (KNN)" if is_auto else "Directo"
+    }
+    query_text = json.dumps(query_data)
+    record_transaction(consumer_id, resolved, prompt_tokens, completion_tokens, cost, latency, stream=True, query_text=query_text)
