@@ -60,8 +60,10 @@
                     <ul style="padding-left:1.25rem; display:flex; flex-direction:column; gap:0.25rem;">
                         <li><strong>Proxy / Routing (Lógica de tránsito):</strong> <a
                                 href="file:///home/mipc/Escritorio/universidad/hackaton%20mercedes/src/app/proxy.py">proxy.py</a>
-                            y <a
+                            , <a
                                 href="file:///home/mipc/Escritorio/universidad/hackaton%20mercedes/src/app/utils/knn_routing.py">knn_routing.py</a>
+                            y <a
+                                href="file:///home/mipc/Escritorio/universidad/hackaton%20mercedes/src/testing/analyzer_simple.py">analyzer_simple.py</a>
                             interceptan y clasifican peticiones sin acceder a almacenamiento persistente directamente.
                         </li>
                         <li><strong>Almacenamiento (Base de datos):</strong> <a
@@ -80,7 +82,8 @@
                         <strong>nunca se exponen a los clientes o consumidores de la API</strong>. Los clientes se
                         identifican usando cabeceras de identidad de red (como <code>x-username</code>) y el gateway
                         proxy se encarga de inyectar las credenciales correspondientes antes de redirigir la consulta al
-                        proveedor final.</p>
+                        proveedor final.
+                    </p>
                 </div>
             </div>
         </div>
