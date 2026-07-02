@@ -236,8 +236,9 @@ def handle_live_stream(target_url: str, headers: dict, body: dict, consumer_id: 
     est_prompt_tokens = max(1, int(char_count / 4))
     
     try:
+        clean_body = {k: v for k, v in body.items() if k not in ["is_auto_routed", "prompt_text"]}
         with httpx.Client(timeout=60.0) as client:
-            with client.stream("POST", target_url, headers=headers, json=body) as response:
+            with client.stream("POST", target_url, headers=headers, json=clean_body) as response:
                 if response.status_code != 200:
                     error_content = response.read().decode("utf-8")
                     yield f"data: {json.dumps({'error': error_content})}\n\n"

@@ -177,8 +177,9 @@ def handle_proxy(model_name):
         return Response(handle_live_stream(target_url, headers, body, user_id, resolved, start_time), mimetype="text/event-stream")
     else:
         try:
+            clean_body = {k: v for k, v in body.items() if k not in ["is_auto_routed", "prompt_text"]}
             with httpx.Client(timeout=60.0) as client:
-                res = client.post(target_url, headers=headers, json=body)
+                res = client.post(target_url, headers=headers, json=clean_body)
                 if res.status_code != 200:
                     return Response(res.content, status=res.status_code, content_type=res.headers.get("content-type"))
                 
