@@ -3,34 +3,31 @@
 {% block content %}
 <div class="dashboard-grid" style="grid-template-columns: 1.1fr 0.9fr; gap: 2rem;">
     
-    <!-- Panel Izquierdo: Ficha y Flujo de Arquitectura -->
     <div style="display: flex; flex-direction: column; gap: 2rem;">
         
-        <!-- Ficha Técnica -->
         <div class="glass-card">
             <div class="card-title">
-                Ficha Técnica del Proyecto
+                Ficha técnica del proyecto
                 <span class="badge" style="background:var(--accent-success-glow); color:#34d399;">Mercedes Hackathon</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.75rem; color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem;">
-                <p><strong>Nombre del Proyecto:</strong> AI FinOps Gateway - Portal de Enrutamiento Optimizado y Gobernanza de Costes de Modelos LLM.</p>
-                <p><strong>Objetivo Principal:</strong> Interceptar y optimizar en tiempo real el consumo de modelos de lenguaje grandes (LLMs) en la empresa, aplicando límites de presupuesto dinámicos y enrutamiento inteligente mediante Machine Learning.</p>
+                <p><strong>Nombre del proyecto:</strong> AI FinOps Gateway - Portal de enrutamiento optimizado y gobernanza de costes de modelos LLM.</p>
+                <p><strong>Objetivo principal:</strong> Interceptar y optimizar en tiempo real el consumo de modelos de lenguaje grandes (LLMs) en la empresa, aplicando límites de presupuesto dinámicos y enrutamiento inteligente mediante Machine Learning.</p>
                 <p><strong>Logros clave alcanzados:</strong></p>
                 <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
                     <li><strong style="color:#fff;">Pilar 1 (Visibilidad):</strong> Desglose preciso de consumo por modelo y departamento con tarifas oficiales de tokens.</li>
                     <li><strong style="color:#fff;">Pilar 2 (Gobernanza):</strong> Bloqueo de peticiones por superación de presupuesto y predicción ARIMA de gasto.</li>
                     <li><strong style="color:#fff;">Pilar 3 (Inteligencia):</strong> Clasificador KNN con distancia de Gower para enrutar según el prompt.</li>
-                    <li><strong style="color:#fff;">Pilar 4 (Demo y Doc):</strong> Dashboard web unificado e interactivo y scripts de automatización.</li>
+                    <li><strong style="color:#fff;">Pilar 4 (Demo y doc):</strong> Dashboard web unificado e interactivo y scripts de automatización.</li>
                 </ul>
             </div>
         </div>
 
 
-        <!-- Arquitectura, Diseño Agnóstico y Seguridad -->
         <div class="glass-card">
             <div class="card-title">
-                Principios de Diseño y Arquitectura
-                <span class="badge" style="background:var(--accent-primary-glow); color:#c084fc;">Evaluación Jurado</span>
+                Principios de diseño y arquitectura
+                <span class="badge" style="background:var(--accent-primary-glow); color:#c084fc;">Evaluación</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 1rem; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
                 <div>
@@ -40,13 +37,13 @@
                 <div>
                     <h4 style="color:#fff; font-size:0.95rem; margin-bottom:0.25rem;">🛠️ Separación de Responsabilidades</h4>
                     <ul style="padding-left:1.25rem; display:flex; flex-direction:column; gap:0.25rem;">
-                        <li><strong>Proxy / Routing (Lógica de Tránsito):</strong> <a href="file:///home/mipc/Escritorio/universidad/hackaton%20mercedes/src/app/proxy.py">proxy.py</a> y <a href="file:///home/mipc/Escritorio/universidad/hackaton%20mercedes/src/app/utils/knn_routing.py">knn_routing.py</a> interceptan y clasifican peticiones sin acceder a almacenamiento persistente directamente.</li>
-                        <li><strong>Almacenamiento (Base de Datos):</strong> <a href="file:///home/mipc/Escritorio/universidad/hackaton%20mercedes/src/app/database.py">database.py</a> encapsula la persistencia física en SQLite de forma aislada.</li>
-                        <li><strong>Reporting / Interfaz (Capa de Presentación):</strong> Las vistas del portal visualizan costes, forecast y configuraciones comunicándose mediante endpoints REST seguros sin acceder a la base de datos directamente.</li>
+                        <li><strong>Proxy / Routing (Lógica de tránsito):</strong> <a href="file:///home/mipc/Escritorio/universidad/hackaton%20mercedes/src/app/proxy.py">proxy.py</a> y <a href="file:///home/mipc/Escritorio/universidad/hackaton%20mercedes/src/app/utils/knn_routing.py">knn_routing.py</a> interceptan y clasifican peticiones sin acceder a almacenamiento persistente directamente.</li>
+                        <li><strong>Almacenamiento (Base de datos):</strong> <a href="file:///home/mipc/Escritorio/universidad/hackaton%20mercedes/src/app/database.py">database.py</a> encapsula la persistencia física en SQLite de forma aislada.</li>
+                        <li><strong>Reporting / Interfaz (Capa de presentación):</strong> Las vistas del portal visualizan costes, forecast y configuraciones comunicándose mediante endpoints REST seguros sin acceder a la base de datos directamente.</li>
                     </ul>
                 </div>
                 <div>
-                    <h4 style="color:#fff; font-size:0.95rem; margin-bottom:0.25rem;">🔒 Seguridad: Claves de API Protegidas</h4>
+                    <h4 style="color:#fff; font-size:0.95rem; margin-bottom:0.25rem;">🔒 Seguridad: claves de API protegidas</h4>
                     <p>Las claves de API de los proveedores (como <code>GROQ_API_KEY</code>) se configuran y guardan exclusivamente del lado del servidor (mediante variables de entorno en el contenedor Docker) y <strong>nunca se exponen a los clientes o consumidores de la API</strong>. Los clientes se identifican usando cabeceras de identidad de red (como <code>x-username</code>) y el gateway proxy se encarga de inyectar las credenciales correspondientes antes de redirigir la consulta al proveedor final.</p>
                 </div>
             </div>
@@ -54,12 +51,12 @@
 
         <!-- Ciclo de Vida de una Petición -->
         <div class="glass-card">
-            <div class="card-title">Diagrama de Flujo del Gateway</div>
+            <div class="card-title">Diagrama de flujo del gateway</div>
             <div style="display: flex; flex-direction: column; gap: 1rem; position: relative; padding-left: 1rem; border-left: 2px solid var(--border-color); margin-left: 0.5rem; font-size: 0.88rem; color: var(--text-secondary);">
                 
                 <div style="position: relative;">
                     <span style="position: absolute; left: -1.45rem; top: 0; background: var(--bg-color); border: 2px solid var(--accent-primary); width: 16px; height: 16px; border-radius: 50%;"></span>
-                    <strong style="color:#fff; display:block; margin-bottom:0.15rem;">1. Entrada del Prompt</strong>
+                    <strong style="color:#fff; display:block; margin-bottom:0.15rem;">1. Entrada del prompt</strong>
                     El usuario o script realiza una consulta (ej. al endpoint unificado <code>/api/v1/auto</code>).
                 </div>
                 
