@@ -41,9 +41,17 @@
                                 <li><code>departamento</code> (Rol/Equipo del usuario: marketing, desarrollo, rrhh).
                                 </li>
                                 <li><code>prompt_tokens</code> (Estimado del tamaño de entrada).</li>
-                                <li><code>latency_s</code>, <code>completion_tokens</code>, <code>total_tokens</code>,
-                                    <code>cost</code> (Imputados con las medianas de entrenamiento).
-                                </li>
+                                <li><code>Procesamiento de lenguaje (NLP)</code> Mediante la técnica de analisis de sentimiento, hemos extraido
+                                    cuatro métricas a partir de las querys para poder clasificarlas mejor. Este proceso nos permite obtener datos 
+                                    numéricos fácilmente procesables por KNN a partir del texto base. Más info más abajo.</li> 
+                            </ul>
+                        </li>
+                        <li><strong>Analisis adicional de los datos cimiento:</strong>
+                            <ul style="padding-left: 1rem; margin-top: 0.25rem; color: var(--text-secondary);">
+                                <li> Para etiquetar con su modelo más óptimo la pool de datos a partir de los cuales KNN realiza sus predicciones, 
+                                     tenemos en cuenta el comportamiento de los tres modelos para cada una de las querys. Basandonos en estos datos y en
+                                     las variables predictoras, clasificamos estos datos de manera más fina.Más info más abajo.
+                                </li> 
                             </ul>
                         </li>
                         <li><strong>Resolución Destino:</strong> Enruta de forma fluida a <code>llama3.2:3b</code>,
@@ -55,9 +63,9 @@
                 <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
                     <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem;">Próximos Pasos (optimicación a futuro)</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted);">
-                        Ahora mismo tenemos dos factores limitantes en nuestro proxy, la cantidad de datos clasificados y el algoritmoque empleamos.
+                        Ahora mismo tenemos dos factores limitantes en nuestro proxy, la cantidad de datos clasificados y el algoritmo que empleamos.
                         Si aumentamos el volumen de datos clasificados, utilizando nuestro método de clasificación completo (lanzar la query a los tres 
-                        modelos además de hacer el análisis de sentimiento), nuestro algoritmo se volverá más lento (un dato más es una distancia más que calcular, cada vez).
+                        modelos, además de hacer el análisis de sentimiento), nuestro algoritmo se volverá más lento (un dato más es una distancia más que calcular, cada vez).
                         Nuestra aproximación actual, aunque buena, podría adaptarse mejor a una mayor cantidad de datos base utilizando el algoritmo ANNOY. 
                         Es similar al KNN que usamos actualmente, pero se adapta mucho mejor a volúmenes de datos elevados.
                     </p>
