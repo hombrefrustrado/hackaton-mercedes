@@ -753,6 +753,8 @@
         
         if (data.status === "online") {
             indicator.className = "status-indicator online";
+            indicator.style.backgroundColor = "";
+            indicator.style.boxShadow = "";
             latencySpan.innerText = `${data.latency_ms}ms`;
         } else if (data.status === "error") {
             indicator.className = "status-indicator warning";
@@ -761,8 +763,8 @@
             latencySpan.innerText = "Error";
         } else {
             indicator.className = "status-indicator offline";
-            latencySpan.style.backgroundColor = "var(--accent-danger)";
-            latencySpan.style.boxShadow = "0 0 8px var(--accent-danger)";
+            indicator.style.backgroundColor = "";
+            indicator.style.boxShadow = "";
             latencySpan.innerText = "Offline";
         }
     }
