@@ -53,12 +53,13 @@
                 </div>
 
                 <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
-                    <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem;">Próximos Pasos (Espacio para el
-                        Equipo)</h3>
+                    <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem;">Próximos Pasos (optimicación a futuro)</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted);">
-                        El equipo de desarrollo puede completar este módulo implementando las reglas de negocio FinOps
-                        avanzadas, simulaciones de fallos cruzados (failover) y análisis de ahorro obtenido frente al
-                        modelo más caro por defecto.
+                        Ahora mismo tenemos dos factores limitantes en nuestro proxy, la cantidad de datos clasificados y el algoritmoque empleamos.
+                        Si aumentamos el volumen de datos clasificados, utilizando nuestro método de clasificación completo (lanzar la query a los tres 
+                        modelos además de hacer el análisis de sentimiento), nuestro algoritmo se volverá más lento (un dato más es una distancia más que calcular, cada vez).
+                        Nuestra aproximación actual, aunque buena, podría adaptarse mejor a una mayor cantidad de datos base utilizando el algoritmo ANNOY. 
+                        Es similar al KNN que usamos actualmente, pero se adapta mucho mejor a volúmenes de datos elevados.
                     </p>
                 </div>
             </div>
