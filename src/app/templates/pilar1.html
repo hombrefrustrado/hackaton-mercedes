@@ -121,105 +121,54 @@
 </div>
 
 <script>
-    function updatePilar1Stats() {
-        const txs = state.transactions;
-        
-        let totalCost = 0;
-        let totalRequests = txs.length;
-        let totalPromptTokens = 0;
-        let totalCompletionTokens = 0;
-        
-        const modelStats = {
-            "llama3.2:3b": { count: 0, cost: 0, prompt: 0, completion: 0 },
-            "mistral:7b": { count: 0, cost: 0, prompt: 0, completion: 0 },
-            "llama-3.1-8b-instant": { count: 0, cost: 0, prompt: 0, completion: 0 }
-        };
-        
-        const consumerStats = {};
-        if (state.users && state.users.length > 0) {
-            state.users.forEach(user => {
-                const roleCapitalized = user.role_name.charAt(0).toUpperCase() + user.role_name.slice(1);
-                consumerStats[user.email] = {
-                    name: `${user.name} (${roleCapitalized})`,
-                    count: 0,
-                    cost: 0,
-                    prompt: 0,
-                    completion: 0
-                };
-            });
-        }
-        
-        txs.forEach(tx => {
-            const cost = tx.cost;
-            totalCost += cost;
-            totalPromptTokens += tx.prompt_tokens;
-            totalCompletionTokens += tx.completion_tokens;
+    async function updatePilar1Stats() {
+        try {
+            const res = await fetch("/api/finops/reports");
+            if (!res.ok) return;
+            const data = await res.json();
             
-            const modelKey = tx.model;
-            if (modelStats[modelKey]) {
-                modelStats[modelKey].count++;
-                modelStats[modelKey].cost += cost;
-                modelStats[modelKey].prompt += tx.prompt_tokens;
-                modelStats[modelKey].completion += tx.completion_tokens;
+            document.getElementById("p1-total-cost").innerText = formatCost(data.totals.total_cost);
+            document.getElementById("p1-total-requests").innerText = data.totals.total_requests;
+            document.getElementById("p1-total-tokens").innerText = `In: ${data.totals.total_prompt_tokens.toLocaleString()} / Out: ${data.totals.total_completion_tokens.toLocaleString()}`;
+            
+            const consumerBody = document.getElementById("p1-consumer-body");
+            if (consumerBody) {
+                consumerBody.innerHTML = Object.entries(data.consumer_stats).map(([id, item]) => {
+                    if (item.count === 0) return "";
+                    return `
+                        <tr>
+                            <td><strong>${item.name}</strong></td>
+                            <td>${item.count}</td>
+                            <td>In: ${item.prompt.toLocaleString()} / Out: ${item.completion.toLocaleString()}</td>
+                            <td class="tx-cost">${formatCost(item.cost)}</td>
+                            <td>${formatCost(item.avg_cost)}</td>
+                        </tr>
+                    `;
+                }).join("");
+                if (consumerBody.innerHTML === "") {
+                    consumerBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted)">Realiza solicitudes para ver el desglose.</td></tr>`;
+                }
             }
             
-            const userKey = tx.consumer_id;
-            if (consumerStats[userKey]) {
-                consumerStats[userKey].count++;
-                consumerStats[userKey].cost += cost;
-                consumerStats[userKey].prompt += tx.prompt_tokens;
-                consumerStats[userKey].completion += tx.completion_tokens;
-            } else {
-                consumerStats[userKey] = {
-                    name: tx.consumer_name,
-                    count: 1,
-                    cost: cost,
-                    prompt: tx.prompt_tokens,
-                    completion: tx.completion_tokens
-                };
+            const modelBody = document.getElementById("p1-model-body");
+            if (modelBody) {
+                modelBody.innerHTML = Object.entries(data.model_stats).map(([model, item]) => {
+                    let badgeClass = "llama";
+                    if (model.includes("mistral")) badgeClass = "mistral";
+                    else if (model.includes("groq") || model.includes("instant")) badgeClass = "groq";
+                    
+                    return `
+                        <tr>
+                            <td><span class="tx-badge ${badgeClass}">${model}</span></td>
+                            <td>${item.count}</td>
+                            <td>In: ${item.prompt.toLocaleString()} / Out: ${item.completion.toLocaleString()}</td>
+                            <td class="tx-cost">${formatCost(item.cost)}</td>
+                        </tr>
+                    `;
+                }).join("");
             }
-        });
-        
-        document.getElementById("p1-total-cost").innerText = formatCost(totalCost);
-        document.getElementById("p1-total-requests").innerText = totalRequests;
-        document.getElementById("p1-total-tokens").innerText = `In: ${totalPromptTokens.toLocaleString()} / Out: ${totalCompletionTokens.toLocaleString()}`;
-        
-        const consumerBody = document.getElementById("p1-consumer-body");
-        if (consumerBody) {
-            consumerBody.innerHTML = Object.entries(consumerStats).map(([id, data]) => {
-                if (data.count === 0) return "";
-                const avgCost = data.cost / data.count;
-                return `
-                    <tr>
-                        <td><strong>${data.name}</strong></td>
-                        <td>${data.count}</td>
-                        <td>In: ${data.prompt.toLocaleString()} / Out: ${data.completion.toLocaleString()}</td>
-                        <td class="tx-cost">${formatCost(data.cost)}</td>
-                        <td>${formatCost(avgCost)}</td>
-                    </tr>
-                `;
-            }).join("");
-            if (consumerBody.innerHTML === "") {
-                consumerBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted)">Realiza solicitudes para ver el desglose.</td></tr>`;
-            }
-        }
-        
-        const modelBody = document.getElementById("p1-model-body");
-        if (modelBody) {
-            modelBody.innerHTML = Object.entries(modelStats).map(([model, data]) => {
-                let badgeClass = "llama";
-                if (model.includes("mistral")) badgeClass = "mistral";
-                else if (model.includes("groq") || model.includes("instant")) badgeClass = "groq";
-                
-                return `
-                    <tr>
-                        <td><span class="tx-badge ${badgeClass}">${model}</span></td>
-                        <td>${data.count}</td>
-                        <td>In: ${data.prompt.toLocaleString()} / Out: ${data.completion.toLocaleString()}</td>
-                        <td class="tx-cost">${formatCost(data.cost)}</td>
-                    </tr>
-                `;
-            }).join("");
+        } catch (e) {
+            console.error("Error loading pilar 1 reports:", e);
         }
     }
 </script>

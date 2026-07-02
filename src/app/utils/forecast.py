@@ -4,7 +4,8 @@ import numpy as np
 import datetime
 import logging
 import os
-from ..config import DB_FILE, PRICING
+from ..config import DB_FILE
+from ..database import calculate_cost
 
 logger = logging.getLogger("finops_proxy.forecast")
 
@@ -35,13 +36,7 @@ def get_forecast_data(role_filter=None):
     # Convert timestamp to datetime
     df_queries["timestamp"] = pd.to_datetime(df_queries["timestamp"])
     
-    # Calculate cost for each query
-    def calculate_cost(row):
-        model = row["model"]
-        rates = PRICING.get(model, {"input": 0.0, "output": 0.0})
-        return (row["prompt_tokens"] * rates["input"] + row["completion_tokens"] * rates["output"]) / 1_000_000
-        
-    df_queries["cost"] = df_queries.apply(calculate_cost, axis=1)
+    df_queries["cost"] = df_queries.apply(lambda row: calculate_cost(row["model"], row["prompt_tokens"], row["completion_tokens"]), axis=1)
     
     # Filter by role if specified
     if role_filter and role_filter != "todos":

@@ -381,16 +381,7 @@
         // Callback support for base.html
     }
 
-    function renderRecommendations() {
-        // Callback support for base.html
-    }
-
-    function updatePilar1Stats() {
-        updateSavingsDashboard();
-    }
-
-    function updateSavingsDashboard() {
-        const txs = state.transactions;
+    async function updateSavingsDashboard() {
         const routedCostElement = document.getElementById("p3-routed-cost");
         const mistralCostElement = document.getElementById("p3-mistral-cost");
         const savedAmountElement = document.getElementById("p3-saved-amount");
@@ -401,188 +392,140 @@
         
         if (!routedCostElement || !tbody) return;
 
-        if (!txs || txs.length === 0) {
-            routedCostElement.innerText = "$0.00000";
-            mistralCostElement.innerText = "$0.00000";
-            savedAmountElement.innerText = "$0.00000";
-            savingsPctElement.innerText = "0% Ahorrado";
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 1.5rem;">Realiza llamadas para ver el análisis de ahorro.</td></tr>`;
-            if (canvas) canvas.style.display = "none";
-            if (emptyDiv) emptyDiv.style.display = "block";
-            return;
-        }
+        try {
+            const res = await fetch("/api/finops/reports");
+            if (!res.ok) return;
+            const data = await res.json();
+            const savings = data.savings;
 
-        let totalRoutedCost = 0;
-        let totalMistralCost = 0;
-        
-        // Cumulative data for chart
-        const labels = [];
-        const cumulativeRouted = [];
-        const cumulativeMistral = [];
-        
-        let cumulativeR = 0;
-        let cumulativeM = 0;
+            if (!savings || !savings.chart || savings.chart.labels.length === 0) {
+                routedCostElement.innerText = "$0.00000";
+                mistralCostElement.innerText = "$0.00000";
+                savedAmountElement.innerText = "$0.00000";
+                savingsPctElement.innerText = "0% Ahorrado";
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 1.5rem;">Realiza llamadas para ver el análisis de ahorro.</td></tr>`;
+                if (canvas) canvas.style.display = "none";
+                if (emptyDiv) emptyDiv.style.display = "block";
+                return;
+            }
 
-        txs.forEach((tx, idx) => {
-            const promptTokens = tx.prompt_tokens;
-            const completionTokens = tx.completion_tokens;
-            
-            // Mistral cost calculation: $0.24 per 1M tokens ($0.00000024 per token) for both in and out
-            const mistralCost = (promptTokens + completionTokens) * 0.00000024;
-            const routedCost = tx.cost;
+            routedCostElement.innerText = formatCost(savings.total_routed_cost);
+            mistralCostElement.innerText = formatCost(savings.total_mistral_cost);
+            savedAmountElement.innerText = formatCost(savings.total_saved);
+            savingsPctElement.innerText = `${savings.pct_saved.toFixed(1)}% Ahorrado`;
 
-            totalRoutedCost += routedCost;
-            totalMistralCost += mistralCost;
+            // Render table using pre-calculated values
+            tbody.innerHTML = savings.last_5_activations.map(tx => {
+                let badgeClass = "llama";
+                if (tx.model.includes("mistral")) badgeClass = "mistral";
+                else if (tx.model.includes("groq") || tx.model.includes("instant")) badgeClass = "groq";
 
-            cumulativeR += routedCost;
-            cumulativeM += mistralCost;
+                const savedColor = tx.saved > 0 ? "var(--accent-success)" : (tx.saved < 0 ? "var(--accent-danger)" : "var(--text-secondary)");
+                const savedSign = tx.saved > 0 ? "+" : "";
 
-            // Use timestamp or index
-            const d = new Date(tx.timestamp);
-            const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit', second: '2-digit' });
-            labels.push(timeStr);
-            cumulativeRouted.push(cumulativeR);
-            cumulativeMistral.push(cumulativeM);
-        });
-
-        const totalSaved = totalMistralCost - totalRoutedCost;
-        const pctSaved = totalMistralCost > 0 ? (totalSaved / totalMistralCost * 100).toFixed(1) : 0;
-
-        routedCostElement.innerText = formatCost(totalRoutedCost);
-        mistralCostElement.innerText = formatCost(totalMistralCost);
-        savedAmountElement.innerText = formatCost(totalSaved);
-        savingsPctElement.innerText = `${pctSaved}% Ahorrado`;
-
-        // Render table (last 5 requests)
-        const lastTxs = [...txs].reverse().slice(0, 5);
-        tbody.innerHTML = lastTxs.map(tx => {
-            const promptTokens = tx.prompt_tokens;
-            const completionTokens = tx.completion_tokens;
-            const mistralCost = (promptTokens + completionTokens) * 0.00000024;
-            const routedCost = tx.cost;
-            const saved = mistralCost - routedCost;
-
-            let promptText = "API Request";
-            let routingRule = "Directo";
-
-            try {
-                if (tx.query_text) {
-                    const parsed = JSON.parse(tx.query_text);
-                    promptText = parsed.prompt || tx.query_text;
-                    routingRule = parsed.routing || "Directo";
+                // truncate prompt
+                let promptText = tx.prompt_text || "API Request";
+                if (promptText.length > 30) {
+                    promptText = promptText.substring(0, 28) + "...";
                 }
-            } catch(e) {
-                if (tx.query_text) {
-                    promptText = tx.query_text;
+
+                return `
+                    <tr>
+                        <td title="${tx.prompt_text}" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <span style="font-size:0.8rem; font-family:var(--font-family); color:#fff;">${promptText}</span>
+                        </td>
+                        <td>
+                            <span class="badge" style="font-size: 0.7rem; padding: 0.15rem 0.35rem; background: rgba(139, 92, 246, 0.1); color: #c084fc;">${tx.routing_rule}</span>
+                        </td>
+                        <td>
+                            <span class="tx-badge ${badgeClass}" style="font-size: 0.7rem; padding: 0.1rem 0.3rem;">${tx.model}</span>
+                        </td>
+                        <td class="tx-cost" style="font-size:0.8rem;">${formatCost(tx.cost)}</td>
+                        <td style="color:${savedColor}; font-size:0.8rem; font-weight:600;">${savedSign}${formatCost(tx.saved)}</td>
+                    </tr>
+                `;
+            }).join("");
+
+            // Render Chart
+            if (canvas) {
+                canvas.style.display = "block";
+                if (emptyDiv) emptyDiv.style.display = "none";
+
+                const ctx = canvas.getContext("2d");
+
+                if (savingsChart) {
+                    savingsChart.destroy();
                 }
-            }
 
-            // truncate prompt
-            if (promptText.length > 30) {
-                promptText = promptText.substring(0, 28) + "...";
-            }
-
-            let badgeClass = "llama";
-            if (tx.model.includes("mistral")) badgeClass = "mistral";
-            else if (tx.model.includes("groq") || tx.model.includes("instant")) badgeClass = "groq";
-
-            const savedColor = saved > 0 ? "var(--accent-success)" : (saved < 0 ? "var(--accent-danger)" : "var(--text-secondary)");
-            const savedSign = saved > 0 ? "+" : "";
-
-            return `
-                <tr>
-                    <td title="${tx.query_text || ''}" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        <span style="font-size:0.8rem; font-family:var(--font-family); color:#fff;">${promptText}</span>
-                    </td>
-                    <td>
-                        <span class="badge" style="font-size: 0.7rem; padding: 0.15rem 0.35rem; background: rgba(139, 92, 246, 0.1); color: #c084fc;">${routingRule}</span>
-                    </td>
-                    <td>
-                        <span class="tx-badge ${badgeClass}" style="font-size: 0.7rem; padding: 0.1rem 0.3rem;">${tx.model}</span>
-                    </td>
-                    <td class="tx-cost" style="font-size:0.8rem;">${formatCost(routedCost)}</td>
-                    <td style="color:${savedColor}; font-size:0.8rem; font-weight:600;">${savedSign}${formatCost(saved)}</td>
-                </tr>
-            `;
-        }).join("");
-
-        // Render Chart
-        if (canvas) {
-            canvas.style.display = "block";
-            if (emptyDiv) emptyDiv.style.display = "none";
-
-            const ctx = canvas.getContext("2d");
-
-            if (savingsChart) {
-                savingsChart.destroy();
-            }
-
-            savingsChart = new Chart(ctx, {
-                type: "line",
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: "Solo Mistral 7B (Worst-Case)",
-                            data: cumulativeMistral,
-                            borderColor: "rgba(245, 158, 11, 0.8)",
-                            backgroundColor: "rgba(245, 158, 11, 0.05)",
-                            borderWidth: 2,
-                            pointRadius: labels.length > 15 ? 0 : 3,
-                            fill: true
-                        },
-                        {
-                            label: "Enrutador Inteligente (Optimizado)",
-                            data: cumulativeRouted,
-                            borderColor: "rgba(16, 185, 129, 1)",
-                            backgroundColor: "rgba(16, 185, 129, 0.1)",
-                            borderWidth: 3,
-                            pointRadius: labels.length > 15 ? 0 : 4,
-                            pointBackgroundColor: "rgba(16, 185, 129, 1)",
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: "#9ca3af",
-                                font: { family: "'Outfit', sans-serif", size: 10 }
+                savingsChart = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: savings.chart.labels,
+                        datasets: [
+                            {
+                                label: "Solo Mistral 7B (Worst-Case)",
+                                data: savings.chart.cumulative_mistral,
+                                borderColor: "rgba(245, 158, 11, 0.8)",
+                                backgroundColor: "rgba(245, 158, 11, 0.05)",
+                                borderWidth: 2,
+                                pointRadius: savings.chart.labels.length > 15 ? 0 : 3,
+                                fill: true
+                            },
+                            {
+                                label: "Enrutador Inteligente (Optimizado)",
+                                data: savings.chart.cumulative_routed,
+                                borderColor: "rgba(16, 185, 129, 1)",
+                                backgroundColor: "rgba(16, 185, 129, 0.1)",
+                                borderWidth: 3,
+                                pointRadius: savings.chart.labels.length > 15 ? 0 : 4,
+                                pointBackgroundColor: "rgba(16, 185, 129, 1)",
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: "#9ca3af",
+                                    font: { family: "'Outfit', sans-serif", size: 10 }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: ${formatCost(context.raw)}`;
+                                    }
+                                }
                             }
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.dataset.label}: ${formatCost(context.raw)}`;
+                        scales: {
+                            x: {
+                                grid: { color: "rgba(255, 255, 255, 0.03)" },
+                                ticks: { 
+                                    color: "#9ca3af", 
+                                    font: { size: 9 },
+                                    maxRotation: 45,
+                                    autoSkip: true,
+                                    maxTicksLimit: 8
+                                }
+                            },
+                            y: {
+                                grid: { color: "rgba(255, 255, 255, 0.03)" },
+                                ticks: { 
+                                    color: "#9ca3af",
+                                    font: { size: 9 },
+                                    callback: function(value) { return formatCost(value); }
                                 }
                             }
                         }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: "rgba(255, 255, 255, 0.03)" },
-                            ticks: { 
-                                color: "#9ca3af", 
-                                font: { size: 9 },
-                                maxRotation: 45,
-                                autoSkip: true,
-                                maxTicksLimit: 8
-                            }
-                        },
-                        y: {
-                            grid: { color: "rgba(255, 255, 255, 0.03)" },
-                            ticks: { 
-                                color: "#9ca3af",
-                                font: { size: 9 },
-                                callback: function(value) { return formatCost(value); }
-                            }
-                        }
                     }
-                }
-            });
+                });
+            }
+        } catch (e) {
+            console.error("Error loading pilar 3 savings dashboard:", e);
         }
     }
 </script>

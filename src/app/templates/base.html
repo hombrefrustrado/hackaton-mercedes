@@ -703,13 +703,39 @@
         alerts: []
     };
 
-    // Prices mapping for local calculations
-    const pricing = {
+    // Prices mapping for local calculations (will be loaded dynamically)
+    let pricing = {
         "llama3.2:3b": { input: 0.06, output: 0.06, label: "A (Local)" },
         "mistral:7b": { input: 0.24, output: 0.24, label: "B (Local)" },
         "llama-3.1-8b-instant": { input: 0.05, output: 0.08, label: "C (Groq)" },
         "auto": { input: 0.06, output: 0.06, label: "Auto (Llama 3.2)" }
     };
+
+    async function loadPricing() {
+        try {
+            const res = await fetch("/api/finops/models-pricing");
+            if (res.ok) {
+                const data = await res.json();
+                for (const [model, rates] of Object.entries(data)) {
+                    if (pricing[model]) {
+                        pricing[model].input = rates.input;
+                        pricing[model].output = rates.output;
+                    } else {
+                        pricing[model] = {
+                            input: rates.input,
+                            output: rates.output,
+                            label: model
+                        };
+                    }
+                }
+                if (typeof updatePricingBadge === "function") {
+                    updatePricingBadge();
+                }
+            }
+        } catch (e) {
+            console.error("Error loading pricing:", e);
+        }
+    }
 
     // Initialize Page
     function formatCost(val) {
@@ -723,6 +749,7 @@
         if (typeof initPageSpecific === "function") {
             initPageSpecific();
         }
+        loadPricing();
         refreshState();
         checkHealth();
         
