@@ -98,9 +98,16 @@ def handle_proxy(model_name):
         msg = f"Presupuesto agotado para el rol '{role_name}' (Usuario: '{user_id}'). Límite: ${limit:.2f}, Gastado: ${spent:.4f}."
         logger.error(msg)
         return jsonify({"detail": msg}), 402
-
     # 2. Extract request body
     body = request.get_json(silent=True) or {}
+    
+    # Pre-extract prompt for logging and routing
+    prompt = ""
+    for msg in body.get("messages", []):
+        prompt += msg.get("content", "")
+    prompt_tokens = max(1, round(len(prompt) / 4))
+    
+    is_auto_routed = (model_name.lower().strip() == "auto")
     
     # Run KNN classifier if auto-routing is requested
     if resolved == "auto":
@@ -111,11 +118,6 @@ def handle_proxy(model_name):
         if workspace_root not in sys.path:
             sys.path.insert(0, workspace_root)
         from testing.analyzer_simple import analyze_query
-
-        prompt = ""
-        for msg in body.get("messages", []):
-            prompt += msg.get("content", "")
-        prompt_tokens = max(1, round(len(prompt) / 4))
         
         query_scores = analyze_query(prompt)
 
@@ -131,6 +133,8 @@ def handle_proxy(model_name):
         logger.info(f"KNN Classifier selected model '{resolved}' for role '{role_name}', {prompt_tokens} prompt tokens and {query_scores} query scores.")
 
     body["model"] = resolved
+    body["is_auto_routed"] = is_auto_routed
+    body["prompt_text"] = prompt
     
     # Target configurations
     headers = {"Content-Type": "application/json"}
@@ -192,7 +196,14 @@ def handle_proxy(model_name):
                 
                 latency = time.time() - start_time
                 cost = calculate_cost(resolved, prompt_tokens, completion_tokens)
-                record_transaction(user_id, resolved, prompt_tokens, completion_tokens, cost, latency, stream=False)
+                
+                import json
+                query_data = {
+                    "prompt": prompt[:200] + ("..." if len(prompt) > 200 else ""),
+                    "routing": "Auto (KNN)" if is_auto_routed else "Directo"
+                }
+                query_text = json.dumps(query_data)
+                record_transaction(user_id, resolved, prompt_tokens, completion_tokens, cost, latency, stream=False, query_text=query_text)
                 return jsonify(resp_json)
         except Exception as e:
             logger.error(f"Error during live non-stream proxy: {e}")
