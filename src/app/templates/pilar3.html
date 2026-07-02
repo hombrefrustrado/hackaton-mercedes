@@ -175,7 +175,7 @@
                             terminología técnica y de dominio: <code>código</code>, <code>sql</code>,
                             <code>docker</code>, <code>kubernetes</code>, <code>api</code>, <code>arquitectura</code>,
                             <code>configurar</code>, <code>depurar</code>. Solicitudes con alta especificación requieren
-                            un modelo con mayor capacidad de razonamiento. Beneficia a Groq un score alto
+                            un modelo con mayor capacidad de razonamiento. Beneficia más a Groq un score alto.
                         </p>
                     </div>
 
@@ -187,7 +187,7 @@
                             quiere una respuesta step-by-step mediante marcadores como <code>paso a paso</code>,
                             <code>exactamente</code>, <code>detalla</code>, <code>instrucciones precisas</code>,
                             <code>lista numerada</code>. Implica estructurar bien la respuesta, priorizando modelos más
-                            instructivos.
+                            instructivos. Beneficia más a Groq un score alto.
                         </p>
                     </div>
 
@@ -199,7 +199,7 @@
                             esperada es larga (<code>informe completo</code>, <code>guion de 8 minutos</code>,
                             <code>1000 palabras</code>, <code>exhaustivo</code>) o corta (<code>brevemente</code>,
                             <code>en una frase</code>, <code>resumen</code>). Determina qué modelo optimiza mejor el
-                            coste por token.
+                            coste por token. Las querys cortas propician a que Ollama sea elegido. 
                         </p>
                     </div>
 
@@ -344,7 +344,23 @@
                 </table>
             </div>
         </div>
-
+        
+        <div class="glass-card">
+            <div class="card-title">
+                Eficiencia por Lazy Learning
+                <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">Coste $0 en Entrenamiento</span>
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.75rem;">
+                <p>La arquitectura de este enrutador inteligente destaca por su extrema ligereza e impacto económico nulo en la infraestructura debido a la naturaleza del algoritmo.</p>
+                
+                <div style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); padding: 1rem; border-radius: 8px; color: var(--text-primary); font-size: 0.85rem; line-height: 1.5;">
+                    <strong>💡 Ventaja del Aprendizaje Perezoso:</strong><br>
+                    Al utilizar K-NN, implementamos un modelo de <em>Lazy Learning</em>. A diferencia de las redes neuronales u otros clasificadores complejos, <strong>no requiere un proceso de entrenamiento previo</strong> costoso en recursos de servidor o GPU. 
+                    <br><br>
+                    El sistema simplemente indexa la pool base de 60 queries en memoria. El coste de computación se desplaza en su totalidad de forma ultraeficiente al momento de la inferencia, haciendo que el mantenimiento del enrutador sea excepcionalmente barato y escalable.
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>
