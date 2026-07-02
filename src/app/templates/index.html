@@ -161,7 +161,7 @@
         
         if (state.users && state.users.length > 0) {
             state.users.forEach(user => {
-                const limitStr = user.budget_limit.toFixed(2);
+                const limitStr = user.budget_limit.toFixed(3);
                 const roleCapitalized = user.role_name.charAt(0).toUpperCase() + user.role_name.slice(1);
                 select.innerHTML += `
                     <option value="${user.email}">${user.name} (${roleCapitalized} - Límite: $${limitStr})</option>
@@ -195,7 +195,7 @@
                 <div class="budget-item">
                     <div class="budget-header">
                         <span class="budget-name">${consumer.name}</span>
-                        <span class="budget-spend">${formatCost(spent)} / $${limit.toFixed(2)} (${pct.toFixed(1)}%)</span>
+                        <span class="budget-spend">${formatCost(spent)} / $${limit.toFixed(3)} (${pct.toFixed(1)}%)</span>
                     </div>
                     <div class="progress-container">
                         <div class="progress-bar ${colorClass}" style="width: ${pct}%"></div>
