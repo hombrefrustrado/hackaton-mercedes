@@ -209,3 +209,195 @@ def handle_proxy(model_name):
         except Exception as e:
             logger.error(f"Error during live non-stream proxy: {e}")
             return jsonify({"detail": str(e)}), 500
+
+@api_bp.route("/api/finops/models-pricing", methods=["GET"])
+def api_get_models_pricing():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT Nombre, cpt_in, cpt_out FROM Modelo")
+    rows = cursor.fetchall()
+    conn.close()
+    
+    pricing = {}
+    for r in rows:
+        pricing[r["Nombre"]] = {
+            "input": float(r["cpt_in"]) * 1_000_000,
+            "output": float(r["cpt_out"]) * 1_000_000
+        }
+    return jsonify(pricing)
+
+@api_bp.route("/api/finops/reports", methods=["GET"])
+def api_get_reports():
+    import datetime
+    import json
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Fetch benchmark Mistral rate per token from database
+    cursor.execute("SELECT cpt_in, cpt_out FROM Modelo WHERE Nombre = 'mistral:7b'")
+    mistral_row = cursor.fetchone()
+    mistral_cpt_in = float(mistral_row["cpt_in"]) if mistral_row else 0.00000024
+    mistral_cpt_out = float(mistral_row["cpt_out"]) if mistral_row else 0.00000024
+    
+    # 1. Total Metrics
+    cursor.execute("""
+        SELECT COUNT(*) as total_requests,
+               COALESCE(SUM(q.Num_tokens_in), 0) as total_prompt_tokens,
+               COALESCE(SUM(q.Num_tokens_out), 0) as total_completion_tokens,
+               COALESCE(SUM(q.Num_tokens_in * m.cpt_in + q.Num_tokens_out * m.cpt_out), 0.0) as total_cost
+        FROM Query q
+        JOIN Modelo m ON q.Modelo = m.Nombre
+    """)
+    totals = dict(cursor.fetchone())
+    
+    # 2. Consumer Stats (grouped by user)
+    cursor.execute("""
+        SELECT u.Email as user_id, u.nombre as user_name, r.nombre as role_name,
+               COUNT(q.Usuario) as count,
+               COALESCE(SUM(q.Num_tokens_in), 0) as prompt,
+               COALESCE(SUM(q.Num_tokens_out), 0) as completion,
+               COALESCE(SUM(q.Num_tokens_in * m.cpt_in + q.Num_tokens_out * m.cpt_out), 0.0) as cost
+        FROM Query q
+        JOIN Usuario u ON q.Usuario = u.Email
+        JOIN Rol r ON u.rol = r.Id
+        JOIN Modelo m ON q.Modelo = m.Nombre
+        GROUP BY u.Email
+    """)
+    consumer_rows = cursor.fetchall()
+    consumer_stats = {}
+    for r in consumer_rows:
+        consumer_stats[r["user_id"]] = {
+            "name": f"{r['user_name']} ({r['role_name'].title()})",
+            "count": r["count"],
+            "prompt": r["prompt"],
+            "completion": r["completion"],
+            "cost": float(r["cost"]),
+            "avg_cost": float(r["cost"]) / r["count"] if r["count"] > 0 else 0.0
+        }
+    
+    # Ensure all DB users are present even with 0 counts
+    cursor.execute("""
+        SELECT u.Email as email, u.nombre as name, r.nombre as role_name
+        FROM Usuario u
+        JOIN Rol r ON u.rol = r.Id
+    """)
+    for u in cursor.fetchall():
+        if u["email"] not in consumer_stats:
+            consumer_stats[u["email"]] = {
+                "name": f"{u['name']} ({u['role_name'].title()})",
+                "count": 0,
+                "prompt": 0,
+                "completion": 0,
+                "cost": 0.0,
+                "avg_cost": 0.0
+            }
+            
+    # 3. Model Stats
+    cursor.execute("""
+        SELECT m.Nombre as model,
+               COUNT(q.Modelo) as count,
+               COALESCE(SUM(q.Num_tokens_in), 0) as prompt,
+               COALESCE(SUM(q.Num_tokens_out), 0) as completion,
+               COALESCE(SUM(q.Num_tokens_in * m.cpt_in + q.Num_tokens_out * m.cpt_out), 0.0) as cost
+        FROM Modelo m
+        LEFT JOIN Query q ON q.Modelo = m.Nombre
+        GROUP BY m.Nombre
+    """)
+    model_rows = cursor.fetchall()
+    model_stats = {}
+    for r in model_rows:
+        model_stats[r["model"]] = {
+            "count": r["count"],
+            "prompt": r["prompt"],
+            "completion": r["completion"],
+            "cost": float(r["cost"])
+        }
+        
+    # 4. Savings Calculations
+    cursor.execute("""
+        SELECT q.Fecha as timestamp, q.Consulta as query_text, q.Modelo as model,
+               q.Num_tokens_in as prompt_tokens, q.Num_tokens_out as completion_tokens,
+               (q.Num_tokens_in * m.cpt_in + q.Num_tokens_out * m.cpt_out) as cost
+        FROM Query q
+        JOIN Modelo m ON q.Modelo = m.Nombre
+        ORDER BY q.Fecha ASC
+    """)
+    queries = cursor.fetchall()
+    conn.close()
+    
+    total_routed_cost = 0.0
+    total_mistral_cost = 0.0
+    labels = []
+    cumulative_routed = []
+    cumulative_mistral = []
+    
+    for q in queries:
+        prompt_tokens = q["prompt_tokens"]
+        completion_tokens = q["completion_tokens"]
+        mistral_cost = (prompt_tokens * mistral_cpt_in) + (completion_tokens * mistral_cpt_out)
+        routed_cost = float(q["cost"])
+        
+        total_routed_cost += routed_cost
+        total_mistral_cost += mistral_cost
+        
+        try:
+            d = datetime.datetime.strptime(q["timestamp"], "%Y-%m-%d %H:%M:%S")
+            time_str = d.strftime("%H:%M:%S")
+        except Exception:
+            time_str = q["timestamp"]
+            
+        labels.append(time_str)
+        cumulative_routed.append(total_routed_cost)
+        cumulative_mistral.append(total_mistral_cost)
+        
+    total_saved = total_mistral_cost - total_routed_cost
+    pct_saved = (total_saved / total_mistral_cost * 100) if total_mistral_cost > 0 else 0.0
+    
+    # 5. Last 5 Activations
+    last_5_activations = []
+    for q in reversed(queries):
+        if len(last_5_activations) >= 5:
+            break
+        prompt_tokens = q["prompt_tokens"]
+        completion_tokens = q["completion_tokens"]
+        mistral_cost = (prompt_tokens * mistral_cpt_in) + (completion_tokens * mistral_cpt_out)
+        routed_cost = float(q["cost"])
+        saved = mistral_cost - routed_cost
+        
+        prompt_text = "API Request"
+        routing_rule = "Directo"
+        try:
+            parsed = json.loads(q["query_text"])
+            prompt_text = parsed.get("prompt", q["query_text"])
+            routing_rule = parsed.get("routing", "Directo")
+        except Exception:
+            if q["query_text"]:
+                prompt_text = q["query_text"]
+                
+        last_5_activations.append({
+            "prompt_text": prompt_text,
+            "routing_rule": routing_rule,
+            "model": q["model"],
+            "cost": routed_cost,
+            "saved": saved
+        })
+        
+    return jsonify({
+        "totals": totals,
+        "consumer_stats": consumer_stats,
+        "model_stats": model_stats,
+        "savings": {
+            "total_routed_cost": total_routed_cost,
+            "total_mistral_cost": total_mistral_cost,
+            "total_saved": total_saved,
+            "pct_saved": pct_saved,
+            "last_5_activations": last_5_activations,
+            "chart": {
+                "labels": labels,
+                "cumulative_routed": cumulative_routed,
+                "cumulative_mistral": cumulative_mistral
+            }
+        }
+    })
+
+
