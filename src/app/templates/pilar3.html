@@ -53,43 +53,75 @@
                 </div>
 
                 <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
-                    <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem;">Próximos Pasos (Espacio para el
-                        Equipo)</h3>
+                    <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem;">Próximos Pasos (optimicación a futuro)</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted);">
-                        El equipo de desarrollo puede completar este módulo implementando las reglas de negocio FinOps
-                        avanzadas, simulaciones de fallos cruzados (failover) y análisis de ahorro obtenido frente al
-                        modelo más caro por defecto.
+                        Ahora mismo tenemos dos factores limitantes en nuestro proxy, la cantidad de datos clasificados y el algoritmoque empleamos.
+                        Si aumentamos el volumen de datos clasificados, utilizando nuestro método de clasificación completo (lanzar la query a los tres 
+                        modelos además de hacer el análisis de sentimiento), nuestro algoritmo se volverá más lento (un dato más es una distancia más que calcular, cada vez).
+                        Nuestra aproximación actual, aunque buena, podría adaptarse mejor a una mayor cantidad de datos base utilizando el algoritmo ANNOY. 
+                        Es similar al KNN que usamos actualmente, pero se adapta mucho mejor a volúmenes de datos elevados.
                     </p>
                 </div>
             </div>
         </div>
 
-        <!-- Tarjeta de Reglas de Enrutamiento y Negocio -->
+        <!-- Tarjeta de Monitoreo de Ahorros e Intercepción de Reglas (Pilar 3) -->
         <div class="glass-card">
-            <div class="card-title">Reglas de Negocio FinOps (Placeholder)</div>
-            <div
-                style="font-size: 0.9rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.75rem;">
-                <p>Configura las reglas para balancear el coste y la latencia según necesidades operativas:</p>
-                <div style="opacity: 0.5; pointer-events: none;">
-                    <div class="form-group">
-                        <label>Prioridad de Optimización</label>
-                        <select disabled>
-                            <option>Minimizar Coste (Por defecto - KNN clasificado)</option>
-                            <option>Minimizar Latencia</option>
-                            <option>Calidad / Contexto Máximo</option>
-                        </select>
+            <div class="card-title">
+                Dashboard de Ahorro y Activación de Reglas (Pilar 3)
+                <span class="badge" style="background:var(--accent-success-glow); color:#34d399;" id="p3-savings-pct">0% Ahorrado</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                    Comparación en tiempo real del gasto optimizado por el enrutador KNN/Directo vs. la política base de utilizar siempre el modelo de alta capacidad local (<strong>Mistral 7B</strong>, a $0.24/1M tokens).
+                </p>
+                
+                <!-- KPIs de Ahorro -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                    <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); padding: 0.75rem; border-radius: 8px; text-align: center;">
+                        <label style="font-size: 0.7rem; color: var(--text-muted); text-transform: none; font-weight: 500;">Gasto Enrutado</label>
+                        <div style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-top: 0.25rem;" id="p3-routed-cost">$0.00</div>
                     </div>
-                    <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                        <label class="toggle-container">
-                            <span class="switch"><input type="checkbox" checked disabled><span
-                                    class="slider"></span></span>
-                            <span>Forzar enrutamiento local si la nube excede $0.05/llamada</span>
-                        </label>
+                    <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); padding: 0.75rem; border-radius: 8px; text-align: center;">
+                        <label style="font-size: 0.7rem; color: var(--text-muted); text-transform: none; font-weight: 500;">Gasto Solo Mistral</label>
+                        <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-secondary); margin-top: 0.25rem;" id="p3-mistral-cost">$0.00</div>
+                    </div>
+                    <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.15); padding: 0.75rem; border-radius: 8px; text-align: center;">
+                        <label style="font-size: 0.7rem; color: #34d399; text-transform: none; font-weight: 500;">Ahorro Estimado</label>
+                        <div style="font-size: 1.15rem; font-weight: 700; color: #34d399; margin-top: 0.25rem;" id="p3-saved-amount">$0.00</div>
                     </div>
                 </div>
-                <div class="alert-item warning" style="margin-top: 0.5rem;">
-                    <span>⏳</span>
-                    <div>Sección pendiente de implementación por el equipo de desarrollo FinOps.</div>
+
+                <!-- Gráfico de Comparativa Mistral vs Enrutado -->
+                <div style="background: rgba(10, 15, 30, 0.5); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color); min-height: 250px; position: relative;">
+                    <canvas id="savingsChart" style="max-height: 250px; width: 100%;"></canvas>
+                    <div id="savings-chart-empty" style="display:none; color:var(--text-muted); font-size:0.9rem; text-align:center; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);">No hay transacciones suficientes para trazar el gráfico de ahorros.</div>
+                </div>
+
+                <!-- Tabla de Detalle de Solicitudes Activadoras -->
+                <div>
+                    <h4 style="color:#fff; font-size:0.95rem; margin-bottom:0.75rem; display:flex; justify-content:space-between; align-items:center;">
+                        <span>Historial de Activación de Reglas y Ahorro</span>
+                        <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">Últimas 5 llamadas</span>
+                    </h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Prompt</th>
+                                    <th>Regla</th>
+                                    <th>Elegido</th>
+                                    <th>Coste Real</th>
+                                    <th>Ahorro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="p3-savings-tbody">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 1.5rem;">Cargando historial de ahorro...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -303,8 +335,11 @@
 </div>
 
 <script>
+    let savingsChart = null;
+
     function initPageSpecific() {
-        // No specific initialization needed for this static/placeholder page
+        // Render initially
+        updateSavingsDashboard();
     }
 
     function renderBudgets() {
@@ -320,7 +355,204 @@
     }
 
     function updatePilar1Stats() {
-        // Callback support for base.html
+        updateSavingsDashboard();
+    }
+
+    function updateSavingsDashboard() {
+        const txs = state.transactions;
+        const routedCostElement = document.getElementById("p3-routed-cost");
+        const mistralCostElement = document.getElementById("p3-mistral-cost");
+        const savedAmountElement = document.getElementById("p3-saved-amount");
+        const savingsPctElement = document.getElementById("p3-savings-pct");
+        const tbody = document.getElementById("p3-savings-tbody");
+        const canvas = document.getElementById("savingsChart");
+        const emptyDiv = document.getElementById("savings-chart-empty");
+        
+        if (!routedCostElement || !tbody) return;
+
+        if (!txs || txs.length === 0) {
+            routedCostElement.innerText = "$0.00000";
+            mistralCostElement.innerText = "$0.00000";
+            savedAmountElement.innerText = "$0.00000";
+            savingsPctElement.innerText = "0% Ahorrado";
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 1.5rem;">Realiza llamadas para ver el análisis de ahorro.</td></tr>`;
+            if (canvas) canvas.style.display = "none";
+            if (emptyDiv) emptyDiv.style.display = "block";
+            return;
+        }
+
+        let totalRoutedCost = 0;
+        let totalMistralCost = 0;
+        
+        // Cumulative data for chart
+        const labels = [];
+        const cumulativeRouted = [];
+        const cumulativeMistral = [];
+        
+        let cumulativeR = 0;
+        let cumulativeM = 0;
+
+        txs.forEach((tx, idx) => {
+            const promptTokens = tx.prompt_tokens;
+            const completionTokens = tx.completion_tokens;
+            
+            // Mistral cost calculation: $0.24 per 1M tokens ($0.00000024 per token) for both in and out
+            const mistralCost = (promptTokens + completionTokens) * 0.00000024;
+            const routedCost = tx.cost;
+
+            totalRoutedCost += routedCost;
+            totalMistralCost += mistralCost;
+
+            cumulativeR += routedCost;
+            cumulativeM += mistralCost;
+
+            // Use timestamp or index
+            const d = new Date(tx.timestamp);
+            const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit', second: '2-digit' });
+            labels.push(timeStr);
+            cumulativeRouted.push(cumulativeR);
+            cumulativeMistral.push(cumulativeM);
+        });
+
+        const totalSaved = totalMistralCost - totalRoutedCost;
+        const pctSaved = totalMistralCost > 0 ? (totalSaved / totalMistralCost * 100).toFixed(1) : 0;
+
+        routedCostElement.innerText = formatCost(totalRoutedCost);
+        mistralCostElement.innerText = formatCost(totalMistralCost);
+        savedAmountElement.innerText = formatCost(totalSaved);
+        savingsPctElement.innerText = `${pctSaved}% Ahorrado`;
+
+        // Render table (last 5 requests)
+        const lastTxs = [...txs].reverse().slice(0, 5);
+        tbody.innerHTML = lastTxs.map(tx => {
+            const promptTokens = tx.prompt_tokens;
+            const completionTokens = tx.completion_tokens;
+            const mistralCost = (promptTokens + completionTokens) * 0.00000024;
+            const routedCost = tx.cost;
+            const saved = mistralCost - routedCost;
+
+            let promptText = "API Request";
+            let routingRule = "Directo";
+
+            try {
+                if (tx.query_text) {
+                    const parsed = JSON.parse(tx.query_text);
+                    promptText = parsed.prompt || tx.query_text;
+                    routingRule = parsed.routing || "Directo";
+                }
+            } catch(e) {
+                if (tx.query_text) {
+                    promptText = tx.query_text;
+                }
+            }
+
+            // truncate prompt
+            if (promptText.length > 30) {
+                promptText = promptText.substring(0, 28) + "...";
+            }
+
+            let badgeClass = "llama";
+            if (tx.model.includes("mistral")) badgeClass = "mistral";
+            else if (tx.model.includes("groq") || tx.model.includes("instant")) badgeClass = "groq";
+
+            const savedColor = saved > 0 ? "var(--accent-success)" : (saved < 0 ? "var(--accent-danger)" : "var(--text-secondary)");
+            const savedSign = saved > 0 ? "+" : "";
+
+            return `
+                <tr>
+                    <td title="${tx.query_text || ''}" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <span style="font-size:0.8rem; font-family:var(--font-family); color:#fff;">${promptText}</span>
+                    </td>
+                    <td>
+                        <span class="badge" style="font-size: 0.7rem; padding: 0.15rem 0.35rem; background: rgba(139, 92, 246, 0.1); color: #c084fc;">${routingRule}</span>
+                    </td>
+                    <td>
+                        <span class="tx-badge ${badgeClass}" style="font-size: 0.7rem; padding: 0.1rem 0.3rem;">${tx.model}</span>
+                    </td>
+                    <td class="tx-cost" style="font-size:0.8rem;">${formatCost(routedCost)}</td>
+                    <td style="color:${savedColor}; font-size:0.8rem; font-weight:600;">${savedSign}${formatCost(saved)}</td>
+                </tr>
+            `;
+        }).join("");
+
+        // Render Chart
+        if (canvas) {
+            canvas.style.display = "block";
+            if (emptyDiv) emptyDiv.style.display = "none";
+
+            const ctx = canvas.getContext("2d");
+
+            if (savingsChart) {
+                savingsChart.destroy();
+            }
+
+            savingsChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: "Solo Mistral 7B (Worst-Case)",
+                            data: cumulativeMistral,
+                            borderColor: "rgba(245, 158, 11, 0.8)",
+                            backgroundColor: "rgba(245, 158, 11, 0.05)",
+                            borderWidth: 2,
+                            pointRadius: labels.length > 15 ? 0 : 3,
+                            fill: true
+                        },
+                        {
+                            label: "Enrutador Inteligente (Optimizado)",
+                            data: cumulativeRouted,
+                            borderColor: "rgba(16, 185, 129, 1)",
+                            backgroundColor: "rgba(16, 185, 129, 0.1)",
+                            borderWidth: 3,
+                            pointRadius: labels.length > 15 ? 0 : 4,
+                            pointBackgroundColor: "rgba(16, 185, 129, 1)",
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: "#9ca3af",
+                                font: { family: "'Outfit', sans-serif", size: 10 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${formatCost(context.raw)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: "rgba(255, 255, 255, 0.03)" },
+                            ticks: { 
+                                color: "#9ca3af", 
+                                font: { size: 9 },
+                                maxRotation: 45,
+                                autoSkip: true,
+                                maxTicksLimit: 8
+                            }
+                        },
+                        y: {
+                            grid: { color: "rgba(255, 255, 255, 0.03)" },
+                            ticks: { 
+                                color: "#9ca3af",
+                                font: { size: 9 },
+                                callback: function(value) { return formatCost(value); }
+                            }
+                        }
+                    }
+                }
+            });
+        }
     }
 </script>
 {% endblock %}
